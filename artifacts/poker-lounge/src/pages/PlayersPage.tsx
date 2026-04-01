@@ -30,7 +30,7 @@ export default function PlayersPage() {
       <div className="p-4 max-w-2xl mx-auto space-y-4">
         {/* Header */}
         <div className="pt-2">
-          <h1 className="font-cinzel text-[#D4AF37] text-xl font-bold tracking-widest">PLAYER DATABASE</h1>
+          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">PLAYER DATABASE</h1>
           <p className="text-gray-500 text-xs mt-1">{filtered.length} registered players</p>
         </div>
 
@@ -64,7 +64,7 @@ export default function PlayersPage() {
               >
                 <Link
                   href={`/player/${player.id}`}
-                  className="block bg-[#111] border border-[#222] hover:border-[#D4AF37]/30 rounded-xl p-4 transition-all cursor-pointer"
+                  className="block bg-[#111] border border-[#222] hover:border-red-600/30 rounded-xl p-4 transition-all cursor-pointer"
                   data-testid={`card-player-${player.id}`}
                 >
                     <div className="flex items-center justify-between">

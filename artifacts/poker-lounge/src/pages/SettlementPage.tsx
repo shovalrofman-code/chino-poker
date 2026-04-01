@@ -34,10 +34,10 @@ export default function SettlementPage() {
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-cinzel text-[#D4AF37] text-xl font-bold tracking-widest">SETTLEMENT</h1>
+          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">SETTLEMENT</h1>
           <div className="flex gap-4 mt-2 text-xs text-gray-500">
             <span>Pot: <span className="text-white font-bold">{settlement.totalPot.toFixed(0)} ₪</span></span>
-            <span>Rake: <span className="text-[#D4AF37] font-bold">{settlement.totalRake.toFixed(2)} ₪</span></span>
+            <span>Rake: <span className="text-white font-bold">{settlement.totalRake.toFixed(2)} ₪</span></span>
           </div>
         </motion.div>
 
@@ -70,7 +70,7 @@ export default function SettlementPage() {
                     )}
                   </div>
                   <div className="flex flex-col items-center">
-                    <div className="text-[#D4AF37] font-black text-lg">{t.amount.toFixed(0)} ₪</div>
+                    <div className="text-white font-black text-lg">{t.amount.toFixed(0)} ₪</div>
                     <ArrowRight className="w-5 h-5 text-gray-600 mt-0.5" />
                   </div>
                   <div className="flex-1 text-right">
@@ -144,10 +144,10 @@ export default function SettlementPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="bg-[#0d0d0d] border border-[#D4AF37]/20 rounded-xl p-4 text-center"
+          className="bg-[#0d0d0d] border border-red-600/20 rounded-xl p-4 text-center"
         >
-          <div className="text-[#D4AF37] font-cinzel font-bold tracking-widest text-sm">GROUP RAKE</div>
-          <div className="text-[#D4AF37] text-3xl font-black mt-1">{settlement.totalRake.toFixed(2)} ₪</div>
+          <div className="text-white font-cinzel font-bold tracking-widest text-sm">GROUP RAKE</div>
+          <div className="text-white text-3xl font-black mt-1">{settlement.totalRake.toFixed(2)} ₪</div>
           <div className="text-gray-600 text-xs mt-1">10% of net profits — added to group balance</div>
         </motion.div>
       </div>

@@ -30,7 +30,7 @@ export default function HistoryPage() {
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
       <div className="p-4 max-w-2xl mx-auto space-y-4">
         <div className="pt-2">
-          <h1 className="font-cinzel text-[#D4AF37] text-xl font-bold tracking-widest">SESSION HISTORY</h1>
+          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">SESSION HISTORY</h1>
           <p className="text-gray-500 text-xs mt-1">{sessions?.length || 0} sessions total</p>
         </div>
 
@@ -44,7 +44,7 @@ export default function HistoryPage() {
             >
               <Link
                 href={session.status === "closed" ? `/settlement/${session.id}` : "/"}
-                className="block bg-[#111] border border-[#222] hover:border-[#D4AF37]/30 rounded-xl p-4 transition-all"
+                className="block bg-[#111] border border-[#222] hover:border-red-600/30 rounded-xl p-4 transition-all"
                 data-testid={`session-card-${session.id}`}
               >
                   <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export default function HistoryPage() {
                     <div className="text-right flex items-center gap-3">
                       <div>
                         {session.status === "closed" && (
-                          <div className="text-[#D4AF37] text-sm font-bold">
+                          <div className="text-white text-sm font-bold">
                             {parseFloat(String(session.totalRake || 0)).toFixed(0)} ₪ rake
                           </div>
                         )}

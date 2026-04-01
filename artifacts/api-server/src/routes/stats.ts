@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, playersTable, sessionsTable, sessionPlayersTable, buyinsTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -19,9 +19,14 @@ async function buildPlayerStats(playerId: number) {
 
   let totalProfit = 0;
   let wins = 0;
+  let losses = 0;
   let biggestWin = 0;
   let biggestLoss = 0;
   let totalBuyinsSum = 0;
+  let longestWinStreak = 0;
+  let currentStreak = 0;
+  let longestLossStreak = 0;
+  let currentLossStreak = 0;
 
   for (const sp of closedSessions) {
     const totalBuyins = parseFloat(sp.totalBuyins as string || "0");
@@ -34,13 +39,31 @@ async function buildPlayerStats(playerId: number) {
 
     totalProfit += netProfit;
     totalBuyinsSum += totalBuyins;
-    if (netProfit > 0) wins++;
+
+    if (netProfit > 0) {
+      wins++;
+      currentStreak++;
+      currentLossStreak = 0;
+      if (currentStreak > longestWinStreak) longestWinStreak = currentStreak;
+    } else if (netProfit < 0) {
+      losses++;
+      currentLossStreak++;
+      currentStreak = 0;
+      if (currentLossStreak > longestLossStreak) longestLossStreak = currentLossStreak;
+    } else {
+      currentStreak = 0;
+      currentLossStreak = 0;
+    }
+
     if (netProfit > biggestWin) biggestWin = netProfit;
     if (netProfit < biggestLoss) biggestLoss = netProfit;
   }
 
   const totalGames = closedSessions.length;
   const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+  const avgProfit = totalGames > 0 ? totalProfit / totalGames : 0;
+  const avgBuyin = totalGames > 0 ? totalBuyinsSum / totalGames : 0;
+  const roi = totalBuyinsSum > 0 ? (totalProfit / totalBuyinsSum) * 100 : 0;
 
   return {
     playerId: player.id,
@@ -53,6 +76,13 @@ async function buildPlayerStats(playerId: number) {
     winRate,
     biggestWin,
     biggestLoss,
+    wins,
+    losses,
+    avgProfit,
+    avgBuyin,
+    roi,
+    longestWinStreak,
+    longestLossStreak,
   };
 }
 

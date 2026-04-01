@@ -157,36 +157,36 @@
 }
 
 .poker-table {
-  background: radial-gradient(ellipse at center, #1a5c2a 0%, #0f3d1a 50%, #0a2d12 100%);
-  border: 8px solid #5a3a1a;
+  background: radial-gradient(ellipse at center, #1a0505 0%, #110202 50%, #0a0101 100%);
+  border: 8px solid #3a0a0a;
   box-shadow: 
-    0 0 0 2px #8B6914,
-    inset 0 0 40px rgba(0,0,0,0.5),
-    0 20px 60px rgba(0,0,0,0.8);
+    0 0 0 2px #DC2626,
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 20px 60px rgba(0,0,0,0.9);
 }
 
 .seat-card {
   background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   transition: all 0.2s ease;
 }
 
 .seat-card:hover {
-  border-color: rgba(212, 175, 55, 0.6);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 15px rgba(212, 175, 55, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 15px rgba(220, 38, 38, 0.15);
 }
 
 .seat-card.active-seat {
-  border-color: rgba(220, 38, 38, 0.5);
+  border-color: rgba(220, 38, 38, 0.7);
 }
 
 .gold-text {
-  color: #D4AF37;
+  color: #ffffff;
 }
 
 .gold-border {
-  border-color: #D4AF37;
+  border-color: #DC2626;
 }
 
 .casino-btn {
@@ -211,7 +211,7 @@
 }
 
 .logo-shimmer {
-  background: linear-gradient(90deg, #D4AF37 0%, #F5D060 30%, #D4AF37 60%, #B8860B 100%);
+  background: linear-gradient(90deg, #ffffff 0%, #DC2626 30%, #ffffff 60%, #ff6666 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -221,7 +221,7 @@
 
 .chip-display {
   background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 @layer utilities {

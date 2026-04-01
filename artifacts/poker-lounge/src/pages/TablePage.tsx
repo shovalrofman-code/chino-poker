@@ -120,8 +120,8 @@ export default function TablePage() {
               </div>
             </div>
             <div className="flex items-center gap-1.5 text-gray-400">
-              <Wallet className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Group Rake: <span className="text-[#D4AF37] font-bold">{groupBalance?.totalRake?.toFixed(0) || 0} ₪</span></span>
+              <Wallet className="w-3.5 h-3.5 text-white" />
+              <span>Group Rake: <span className="text-white font-bold">{groupBalance?.totalRake?.toFixed(0) || 0} ₪</span></span>
             </div>
           </div>
         )}
@@ -144,9 +144,9 @@ export default function TablePage() {
                 >
                   <div className="text-center">
                     <div className="logo-shimmer font-cinzel font-black text-2xl tracking-widest mb-2">
-                      THE POKER LOUNGE
+                      CHINO POKER
                     </div>
-                    <div className="w-24 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto mb-4" />
+                    <div className="w-24 h-px bg-gradient-to-r from-transparent via-red-600 to-transparent mx-auto mb-4" />
                     <div className="text-gray-400 text-sm">No active session</div>
                   </div>
                 </div>

@@ -44,16 +44,16 @@ export function PokerTable({ players, adminMode, onSeatClick, selectedPlayerId }
             height: tableHeight - 60,
           }}
         >
-          {/* Inner felt glow */}
-          <div className="absolute inset-4 rounded-[50%] border border-[rgba(255,255,255,0.05)]" />
+          {/* Inner border glow */}
+          <div className="absolute inset-4 rounded-[50%] border border-[rgba(220,38,38,0.15)]" />
 
           {/* Logo in center */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="text-center">
               <div className="logo-shimmer font-cinzel font-black text-xl tracking-widest mb-1">
-                THE POKER LOUNGE
+                CHINO POKER
               </div>
-              <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto" />
+              <div className="w-16 h-px bg-gradient-to-r from-transparent via-red-600 to-transparent mx-auto" />
               {adminMode && (
                 <div className="mt-2 px-2 py-0.5 bg-red-700 rounded text-[10px] font-bold tracking-widest text-white">
                   ADMIN
@@ -91,7 +91,7 @@ export function PokerTable({ players, adminMode, onSeatClick, selectedPlayerId }
                 </div>
                 <div className="flex items-center gap-1 mt-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                  <span className="text-[#D4AF37] text-xs font-bold">{player.totalBuyins} ₪</span>
+                  <span className="text-white text-xs font-bold">{player.totalBuyins} ₪</span>
                 </div>
                 {player.finalChips !== null && (
                   <div className="text-[10px] text-gray-400 mt-0.5">

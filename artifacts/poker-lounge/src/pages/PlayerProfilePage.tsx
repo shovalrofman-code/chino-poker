@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useGetPlayer, useGetPlayerStats, getGetPlayerQueryKey, getGetPlayerStatsQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
-import { TrendingUp, TrendingDown, Award, Target, Coins, ChevronLeft } from "lucide-react";
+import { TrendingUp, TrendingDown, Award, Target, Coins, ChevronLeft, Flame, BarChart2, Percent, ArrowUpDown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function PlayerProfilePage() {
@@ -41,7 +41,7 @@ export default function PlayerProfilePage() {
       value: (stats?.winRate || 0).toFixed(1),
       suffix: "%",
       icon: Award,
-      color: "text-[#D4AF37]",
+      color: "text-white",
     },
     {
       label: "TOTAL PROFIT",
@@ -56,6 +56,34 @@ export default function PlayerProfilePage() {
       suffix: " ₪",
       icon: Coins,
       color: "text-purple-400",
+    },
+    {
+      label: "AVG PROFIT/SESSION",
+      value: ((stats as any)?.avgProfit || 0) > 0 ? "+" + ((stats as any)?.avgProfit || 0).toFixed(0) : ((stats as any)?.avgProfit || 0).toFixed(0),
+      suffix: " ₪",
+      icon: BarChart2,
+      color: ((stats as any)?.avgProfit || 0) >= 0 ? "text-green-400" : "text-red-400",
+    },
+    {
+      label: "AVG BUY-IN",
+      value: ((stats as any)?.avgBuyin || 0).toFixed(0),
+      suffix: " ₪",
+      icon: ArrowUpDown,
+      color: "text-gray-300",
+    },
+    {
+      label: "ROI",
+      value: ((stats as any)?.roi || 0) > 0 ? "+" + ((stats as any)?.roi || 0).toFixed(1) : ((stats as any)?.roi || 0).toFixed(1),
+      suffix: "%",
+      icon: Percent,
+      color: ((stats as any)?.roi || 0) >= 0 ? "text-green-400" : "text-red-400",
+    },
+    {
+      label: "WIN STREAK RECORD",
+      value: (stats as any)?.longestWinStreak || 0,
+      suffix: " games",
+      icon: Flame,
+      color: "text-orange-400",
     },
   ];
 
@@ -78,6 +106,13 @@ export default function PlayerProfilePage() {
             <div>
               <h1 className="text-white text-2xl font-bold">{player.firstName} {player.lastName}</h1>
               <div className="text-gray-500 text-sm mt-1">{player.phone}</div>
+              {stats && stats.totalGames > 0 && (
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs text-green-400 font-semibold">{(stats as any)?.wins || 0}W</span>
+                  <span className="text-xs text-gray-600">—</span>
+                  <span className="text-xs text-red-400 font-semibold">{(stats as any)?.losses || 0}L</span>
+                </div>
+              )}
             </div>
             <div className={`text-right ${isWinner ? "text-green-400" : isLoser ? "text-red-400" : "text-gray-400"}`}>
               <div className="text-2xl font-bold">
@@ -95,7 +130,7 @@ export default function PlayerProfilePage() {
               key={card.label}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: i * 0.04 }}
               className="bg-[#111] border border-[#222] rounded-xl p-4"
             >
               <div className="flex items-center gap-2 mb-2">
@@ -109,23 +144,34 @@ export default function PlayerProfilePage() {
           ))}
         </div>
 
-        {/* Best/Worst session */}
+        {/* Best/Worst session + streaks */}
         {stats && stats.totalGames > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-[#111] border border-[#222] rounded-xl p-4 space-y-3"
+            transition={{ delay: 0.3 }}
+            className="bg-[#111] border border-[#222] rounded-xl p-4 space-y-4"
           >
             <div className="text-gray-400 text-xs tracking-wider font-semibold">SESSION RECORDS</div>
-            <div className="flex justify-between">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-gray-500 text-xs">Best Session</div>
-                <div className="text-green-400 font-bold text-lg">+{stats.biggestWin.toFixed(0)} ₪</div>
+                <div className="text-gray-500 text-xs mb-1">Best Session</div>
+                <div className="text-green-400 font-bold text-xl">+{stats.biggestWin.toFixed(0)} ₪</div>
               </div>
               <div className="text-right">
-                <div className="text-gray-500 text-xs">Worst Session</div>
-                <div className="text-red-400 font-bold text-lg">{stats.biggestLoss.toFixed(0)} ₪</div>
+                <div className="text-gray-500 text-xs mb-1">Worst Session</div>
+                <div className="text-red-400 font-bold text-xl">{stats.biggestLoss.toFixed(0)} ₪</div>
+              </div>
+              <div>
+                <div className="text-gray-500 text-xs mb-1">Win Streak Record</div>
+                <div className="text-orange-400 font-bold text-xl flex items-center gap-1">
+                  <Flame className="w-4 h-4" />
+                  {(stats as any)?.longestWinStreak || 0} in a row
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-gray-500 text-xs mb-1">Loss Streak Record</div>
+                <div className="text-red-500 font-bold text-xl">{(stats as any)?.longestLossStreak || 0} in a row</div>
               </div>
             </div>
           </motion.div>

@@ -14,13 +14,13 @@ export default function LeaderboardPage() {
   const { data: leaderboard } = useGetLeaderboard({ query: { queryKey: getGetLeaderboardQueryKey() } });
   const { data: groupBalance } = useGetGroupBalance({ query: { queryKey: getGetGroupBalanceQueryKey() } });
 
-  const medalColors = ["text-[#D4AF37]", "text-gray-300", "text-amber-600"];
+  const medalColors = ["text-white", "text-gray-300", "text-amber-600"];
 
   return (
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
       <div className="p-4 max-w-2xl mx-auto space-y-5">
         <div className="pt-2">
-          <h1 className="font-cinzel text-[#D4AF37] text-xl font-bold tracking-widest">LEADERBOARD</h1>
+          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">LEADERBOARD</h1>
           <p className="text-gray-500 text-xs mt-1">All-time rankings</p>
         </div>
 
@@ -28,10 +28,10 @@ export default function LeaderboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-[#0d0d0d] to-[#111] border border-[#D4AF37]/30 rounded-2xl p-5 text-center"
+          className="bg-gradient-to-r from-[#0d0d0d] to-[#111] border border-red-600/30 rounded-2xl p-5 text-center"
         >
           <div className="text-gray-400 text-xs tracking-widest font-bold mb-2">GROUP TREASURY</div>
-          <div className="text-[#D4AF37] text-4xl font-cinzel font-black">
+          <div className="text-white text-4xl font-cinzel font-black">
             {(groupBalance?.totalRake || 0).toFixed(0)} ₪
           </div>
           <div className="text-gray-600 text-xs mt-1">
@@ -50,7 +50,7 @@ export default function LeaderboardPage() {
             >
               <Link
                 href={`/player/${player.playerId}`}
-                className="flex items-center gap-4 bg-[#111] border border-[#222] hover:border-[#D4AF37]/20 rounded-xl p-4 transition-all"
+                className="flex items-center gap-4 bg-[#111] border border-[#222] hover:border-red-600/20 rounded-xl p-4 transition-all"
                 data-testid={`leaderboard-row-${player.playerId}`}
               >
                   {/* Rank */}

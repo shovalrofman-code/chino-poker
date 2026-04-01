@@ -23,7 +23,7 @@ export function Layout({ children, adminMode, onAdminClick }: LayoutProps) {
       <header className="border-b border-[#222] bg-[#0a0a0a] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="font-cinzel font-black text-sm tracking-widest logo-shimmer">
-            THE POKER LOUNGE
+            CHINO POKER
           </span>
         </div>
         <div className="flex items-center gap-2">
