@@ -1,22 +1,29 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: THE POKER LOUNGE API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: players
+    description: Player management
+  - name: sessions
+    description: Session management
+  - name: buyins
+    description: Buy-in management
+  - name: stats
+    description: Player statistics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,290 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /players:
+    get:
+      operationId: listPlayers
+      tags: [players]
+      summary: List all players
+      responses:
+        "200":
+          description: List of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Player"
+    post:
+      operationId: createPlayer
+      tags: [players]
+      summary: Create a new player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlayerBody"
+      responses:
+        "201":
+          description: Created player
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /players/search:
+    get:
+      operationId: searchPlayers
+      tags: [players]
+      summary: Search players by name (autocomplete)
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Player"
+
+  /players/{id}:
+    get:
+      operationId: getPlayer
+      tags: [players]
+      summary: Get a player by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Player found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+        "404":
+          description: Not found
+
+  /players/{id}/stats:
+    get:
+      operationId: getPlayerStats
+      tags: [stats]
+      summary: Get lifetime stats for a player
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Player stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerStats"
+
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List all sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Start a new session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionBody"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/active:
+    get:
+      operationId: getActiveSession
+      tags: [sessions]
+      summary: Get the currently active session
+      responses:
+        "200":
+          description: Active session with players and buy-ins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveSession"
+        "404":
+          description: No active session
+
+  /sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveSession"
+        "404":
+          description: Not found
+
+  /sessions/{id}/close:
+    post:
+      operationId: closeSession
+      tags: [sessions]
+      summary: Close a session, record final chips, calculate settlement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloseSessionBody"
+      responses:
+        "200":
+          description: Settlement result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettlementResult"
+
+  /sessions/{id}/players:
+    post:
+      operationId: addPlayerToSession
+      tags: [sessions]
+      summary: Add a player to an active session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddPlayerToSessionBody"
+      responses:
+        "201":
+          description: Session player created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionPlayer"
+
+  /sessions/{id}/buyins:
+    post:
+      operationId: recordBuyin
+      tags: [buyins]
+      summary: Record a buy-in for a player in a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordBuyinBody"
+      responses:
+        "201":
+          description: Buy-in recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Buyin"
+
+  /sessions/{id}/settlement:
+    get:
+      operationId: getSessionSettlement
+      tags: [sessions]
+      summary: Get settlement details for a closed session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Settlement result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettlementResult"
+
+  /group-balance:
+    get:
+      operationId: getGroupBalance
+      tags: [sessions]
+      summary: Get the running group rake balance
+      responses:
+        "200":
+          description: Group balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupBalance"
+
+  /stats/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [stats]
+      summary: Get all-time player leaderboard
+      responses:
+        "200":
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlayerStats"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +322,262 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        isGuest:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, firstName, lastName, phone, isGuest, createdAt]
+
+    CreatePlayerBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        isGuest:
+          type: boolean
+      required: [firstName, lastName, phone]
+
+    PlayerStats:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        totalGames:
+          type: integer
+        totalBuyins:
+          type: number
+        totalProfit:
+          type: number
+        winRate:
+          type: number
+        biggestWin:
+          type: number
+        biggestLoss:
+          type: number
+      required: [playerId, firstName, lastName, phone, totalGames, totalBuyins, totalProfit, winRate, biggestWin, biggestLoss]
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [active, closed]
+        startedAt:
+          type: string
+        closedAt:
+          type: string
+          nullable: true
+        totalRake:
+          type: number
+      required: [id, status, startedAt, totalRake]
+
+    ActiveSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [active, closed]
+        startedAt:
+          type: string
+        closedAt:
+          type: string
+          nullable: true
+        totalRake:
+          type: number
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionPlayerDetail"
+      required: [id, status, startedAt, totalRake, players]
+
+    SessionPlayer:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        playerId:
+          type: integer
+        totalBuyins:
+          type: number
+        finalChips:
+          type: number
+          nullable: true
+      required: [id, sessionId, playerId, totalBuyins]
+
+    SessionPlayerDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        playerId:
+          type: integer
+        totalBuyins:
+          type: number
+        finalChips:
+          type: number
+          nullable: true
+        player:
+          $ref: "#/components/schemas/Player"
+        buyins:
+          type: array
+          items:
+            $ref: "#/components/schemas/Buyin"
+      required: [id, sessionId, playerId, totalBuyins, player, buyins]
+
+    Buyin:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        playerId:
+          type: integer
+        amount:
+          type: number
+        chips:
+          type: number
+        createdAt:
+          type: string
+      required: [id, sessionId, playerId, amount, chips, createdAt]
+
+    CreateSessionBody:
+      type: object
+      properties:
+        note:
+          type: string
+      required: []
+
+    AddPlayerToSessionBody:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        initialBuyin:
+          type: number
+      required: [playerId, initialBuyin]
+
+    RecordBuyinBody:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        amount:
+          type: number
+      required: [playerId, amount]
+
+    CloseSessionBody:
+      type: object
+      properties:
+        finalChips:
+          type: array
+          items:
+            type: object
+            properties:
+              playerId:
+                type: integer
+              chips:
+                type: number
+            required: [playerId, chips]
+      required: [finalChips]
+
+    SettlementResult:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        totalPot:
+          type: number
+        totalRake:
+          type: number
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlayerSettlement"
+        transfers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transfer"
+      required: [sessionId, totalPot, totalRake, players, transfers]
+
+    PlayerSettlement:
+      type: object
+      properties:
+        playerId:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        totalBuyins:
+          type: number
+        finalChips:
+          type: number
+        profit:
+          type: number
+        rake:
+          type: number
+        netProfit:
+          type: number
+      required: [playerId, firstName, lastName, phone, totalBuyins, finalChips, profit, rake, netProfit]
+
+    Transfer:
+      type: object
+      properties:
+        fromPlayerId:
+          type: integer
+        fromName:
+          type: string
+        fromPhone:
+          type: string
+        toPlayerId:
+          type: integer
+        toName:
+          type: string
+        toPhone:
+          type: string
+        amount:
+          type: number
+      required: [fromPlayerId, fromName, fromPhone, toPlayerId, toName, toPhone, amount]
+
+    GroupBalance:
+      type: object
+      properties:
+        totalRake:
+          type: number
+        sessionsCount:
+          type: integer
+      required: [totalRake, sessionsCount]
