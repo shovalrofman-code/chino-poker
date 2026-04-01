@@ -1,4 +1,4 @@
-const ADMIN_PASSWORD = "poker2024";
+const ADMIN_PASSWORD = "Shoval25";
 const ADMIN_KEY = "poker_admin_auth";
 
 export function isAdmin(): boolean {

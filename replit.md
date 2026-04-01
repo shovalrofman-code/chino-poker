@@ -25,7 +25,7 @@ A high-end professional poker session manager web app. Casino-style dark theme (
 
 **Features:**
 - Circular poker table layout showing active session players
-- Admin password protection (`poker2024`)
+- Admin password protection (`Shoval25`)
 - Player database with autocomplete (search by name/phone)
 - Buy-in tracking: default 50 NIS = 100 chips (1:2 ratio). Quick +50/+100/+200 NIS buttons
 - Session timer (real-time clock from session start)
@@ -44,7 +44,7 @@ A high-end professional poker session manager web app. Casino-style dark theme (
 - `/history` — Session history
 - `/leaderboard` — All-time rankings + group treasury
 
-**Admin password:** `poker2024` (stored in sessionStorage)
+**Admin password:** `Shoval25` (stored in sessionStorage)
 
 ## Structure
 

@@ -11,7 +11,7 @@ export function useAdmin() {
   }, []);
 
   const login = (password: string) => {
-    if (password === "poker2024") {
+    if (password === "Shoval25") {
       sessionStorage.setItem("admin_status", "true");
       setIsAdmin(true);
       return true;
