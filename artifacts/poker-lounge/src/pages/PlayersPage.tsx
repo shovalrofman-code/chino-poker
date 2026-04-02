@@ -4,15 +4,17 @@ import { useListPlayers, useGetLeaderboard, getListPlayersQueryKey, getGetLeader
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
 import { AdminLoginModal } from "@/components/AdminLoginModal";
-import { Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { RegisterPlayerModal } from "@/components/RegisterPlayerModal";
+import { Search, TrendingUp, TrendingDown, Minus, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function PlayersPage() {
   const { adminMode, login } = useAdmin();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: players } = useListPlayers({ query: { queryKey: getListPlayersQueryKey() } });
+  const { data: players, refetch } = useListPlayers({ query: { queryKey: getListPlayersQueryKey() } });
   const { data: leaderboard } = useGetLeaderboard({ query: { queryKey: getGetLeaderboardQueryKey() } });
 
   const filtered = players?.filter(p =>
@@ -27,27 +29,40 @@ export default function PlayersPage() {
 
   return (
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
-      <div className="p-4 max-w-2xl mx-auto space-y-4">
+      <div className="p-4 max-w-xl mx-auto space-y-4 pb-8">
+
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">PLAYER DATABASE</h1>
-          <p className="text-gray-500 text-xs mt-1">{filtered.length} registered players</p>
+        <div className="pt-2 flex items-center justify-between">
+          <div>
+            <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">PLAYERS</h1>
+            <p className="text-gray-400 text-xs mt-0.5">{filtered.length} registered</p>
+          </div>
+          {adminMode && (
+            <button
+              onClick={() => setShowRegister(true)}
+              className="casino-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide"
+              data-testid="button-register-player"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add Player
+            </button>
+          )}
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="search"
             placeholder="Search by name or phone..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-[#111] border border-[#333] rounded-lg pl-9 pr-4 py-2.5 text-white placeholder:text-gray-600 text-sm focus:outline-none focus:border-red-700 transition-colors"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all"
             data-testid="input-search-players"
           />
         </div>
 
-        {/* Players list */}
+        {/* Player list */}
         <div className="space-y-2">
           {filtered.map((player, i) => {
             const stats = statsMap.get(player.id);
@@ -58,36 +73,41 @@ export default function PlayersPage() {
             return (
               <motion.div
                 key={player.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.03 }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.025 }}
               >
                 <Link
                   href={`/player/${player.id}`}
-                  className="block bg-[#111] border border-[#222] hover:border-red-600/30 rounded-xl p-4 transition-all cursor-pointer"
+                  className="flex items-center justify-between bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all cursor-pointer block"
                   data-testid={`card-player-${player.id}`}
                 >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="text-white font-semibold">
-                          {player.firstName} {player.lastName}
-                        </div>
-                        <div className="text-gray-500 text-xs mt-0.5">{player.phone}</div>
-                      </div>
-                      <div className="text-right">
-                        {games > 0 ? (
-                          <>
-                            <div className={`font-bold text-sm flex items-center gap-1 justify-end ${profit > 0 ? "text-green-400" : profit < 0 ? "text-red-400" : "text-gray-400"}`}>
-                              {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
-                              {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
-                            </div>
-                            <div className="text-gray-500 text-xs mt-0.5">{games} games • {winRate.toFixed(0)}% wins</div>
-                          </>
-                        ) : (
-                          <div className="text-gray-600 text-xs">No games yet</div>
-                        )}
-                      </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-red-600 font-bold text-sm">
+                        {player.firstName[0]}{player.lastName?.[0] || ""}
+                      </span>
                     </div>
+                    <div className="min-w-0">
+                      <div className="text-gray-900 font-semibold text-sm truncate">
+                        {player.firstName} {player.lastName}
+                      </div>
+                      <div className="text-gray-400 text-xs truncate">{player.phone || "No phone"}</div>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-3">
+                    {games > 0 ? (
+                      <>
+                        <div className={`font-bold text-sm flex items-center gap-1 justify-end ${profit > 0 ? "text-green-600" : profit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                          {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                          {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
+                        </div>
+                        <div className="text-gray-400 text-xs">{games}g · {winRate.toFixed(0)}%W</div>
+                      </>
+                    ) : (
+                      <div className="text-gray-300 text-xs">No games</div>
+                    )}
+                  </div>
                 </Link>
               </motion.div>
             );
@@ -95,20 +115,24 @@ export default function PlayersPage() {
         </div>
 
         {filtered.length === 0 && !search && (
-          <div className="text-center py-16 text-gray-600">
-            <div className="font-cinzel text-2xl mb-2">No players yet</div>
-            <div className="text-sm">Players appear here after joining a session</div>
+          <div className="text-center py-16 text-gray-300">
+            <div className="font-cinzel text-2xl mb-2 text-gray-300">No players yet</div>
+            {adminMode
+              ? <button onClick={() => setShowRegister(true)} className="text-red-500 font-semibold text-sm underline">Add your first player</button>
+              : <div className="text-sm text-gray-400">Login as admin to add players</div>
+            }
           </div>
         )}
 
         {filtered.length === 0 && search && (
-          <div className="text-center py-10 text-gray-600 text-sm">
-            No players found for "{search}"
+          <div className="text-center py-10 text-gray-400 text-sm">
+            No players match "{search}"
           </div>
         )}
       </div>
 
       <AdminLoginModal open={showAdminLogin} onClose={() => setShowAdminLogin(false)} onLogin={login} />
+      <RegisterPlayerModal open={showRegister} onClose={() => { setShowRegister(false); refetch(); }} />
     </Layout>
   );
 }

@@ -1,5 +1,4 @@
-import { useParams } from "wouter";
-import { Link } from "wouter";
+import { useParams, Link } from "wouter";
 import { useGetPlayer, useGetPlayerStats, getGetPlayerQueryKey, getGetPlayerStatsQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -17,9 +16,7 @@ export default function PlayerProfilePage() {
   if (!player) {
     return (
       <Layout adminMode={adminMode}>
-        <div className="flex items-center justify-center h-full py-20">
-          <div className="text-gray-500">Loading...</div>
-        </div>
+        <div className="flex items-center justify-center h-full py-20 text-gray-400 text-sm">Loading...</div>
       </Layout>
     );
   }
@@ -27,160 +24,115 @@ export default function PlayerProfilePage() {
   const profit = stats?.totalProfit || 0;
   const isWinner = profit > 0;
   const isLoser = profit < 0;
+  const s = stats as any;
 
   const statCards = [
-    {
-      label: "TOTAL GAMES",
-      value: stats?.totalGames || 0,
-      suffix: "",
-      icon: Target,
-      color: "text-blue-400",
-    },
-    {
-      label: "WIN RATE",
-      value: (stats?.winRate || 0).toFixed(1),
-      suffix: "%",
-      icon: Award,
-      color: "text-white",
-    },
-    {
-      label: "TOTAL PROFIT",
-      value: (profit > 0 ? "+" : "") + profit.toFixed(0),
-      suffix: " ₪",
-      icon: profit >= 0 ? TrendingUp : TrendingDown,
-      color: isWinner ? "text-green-400" : isLoser ? "text-red-400" : "text-gray-400",
-    },
-    {
-      label: "TOTAL BUY-INS",
-      value: (stats?.totalBuyins || 0).toFixed(0),
-      suffix: " ₪",
-      icon: Coins,
-      color: "text-purple-400",
-    },
-    {
-      label: "AVG PROFIT/SESSION",
-      value: ((stats as any)?.avgProfit || 0) > 0 ? "+" + ((stats as any)?.avgProfit || 0).toFixed(0) : ((stats as any)?.avgProfit || 0).toFixed(0),
-      suffix: " ₪",
-      icon: BarChart2,
-      color: ((stats as any)?.avgProfit || 0) >= 0 ? "text-green-400" : "text-red-400",
-    },
-    {
-      label: "AVG BUY-IN",
-      value: ((stats as any)?.avgBuyin || 0).toFixed(0),
-      suffix: " ₪",
-      icon: ArrowUpDown,
-      color: "text-gray-300",
-    },
-    {
-      label: "ROI",
-      value: ((stats as any)?.roi || 0) > 0 ? "+" + ((stats as any)?.roi || 0).toFixed(1) : ((stats as any)?.roi || 0).toFixed(1),
-      suffix: "%",
-      icon: Percent,
-      color: ((stats as any)?.roi || 0) >= 0 ? "text-green-400" : "text-red-400",
-    },
-    {
-      label: "WIN STREAK RECORD",
-      value: (stats as any)?.longestWinStreak || 0,
-      suffix: " games",
-      icon: Flame,
-      color: "text-orange-400",
-    },
+    { label: "TOTAL GAMES", value: stats?.totalGames || 0, suffix: "", icon: Target, color: "text-blue-500", bg: "bg-blue-50 border-blue-100" },
+    { label: "WIN RATE", value: (stats?.winRate || 0).toFixed(1), suffix: "%", icon: Award, color: "text-purple-500", bg: "bg-purple-50 border-purple-100" },
+    { label: "TOTAL PROFIT", value: (profit > 0 ? "+" : "") + profit.toFixed(0), suffix: " ₪", icon: profit >= 0 ? TrendingUp : TrendingDown, color: isWinner ? "text-green-600" : isLoser ? "text-red-500" : "text-gray-400", bg: isWinner ? "bg-green-50 border-green-100" : isLoser ? "bg-red-50 border-red-100" : "bg-gray-50 border-gray-100" },
+    { label: "TOTAL BUY-INS", value: (stats?.totalBuyins || 0).toFixed(0), suffix: " ₪", icon: Coins, color: "text-orange-500", bg: "bg-orange-50 border-orange-100" },
+    { label: "AVG / SESSION", value: (s?.avgProfit || 0) > 0 ? "+" + (s?.avgProfit || 0).toFixed(0) : (s?.avgProfit || 0).toFixed(0), suffix: " ₪", icon: BarChart2, color: (s?.avgProfit || 0) >= 0 ? "text-green-600" : "text-red-500", bg: (s?.avgProfit || 0) >= 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100" },
+    { label: "AVG BUY-IN", value: (s?.avgBuyin || 0).toFixed(0), suffix: " ₪", icon: ArrowUpDown, color: "text-gray-500", bg: "bg-gray-50 border-gray-100" },
+    { label: "ROI", value: (s?.roi || 0) > 0 ? "+" + (s?.roi || 0).toFixed(1) : (s?.roi || 0).toFixed(1), suffix: "%", icon: Percent, color: (s?.roi || 0) >= 0 ? "text-green-600" : "text-red-500", bg: (s?.roi || 0) >= 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100" },
+    { label: "WIN STREAK", value: s?.longestWinStreak || 0, suffix: "🔥", icon: Flame, color: "text-orange-500", bg: "bg-orange-50 border-orange-100" },
   ];
 
   return (
     <Layout adminMode={adminMode}>
-      <div className="p-4 max-w-2xl mx-auto space-y-6">
-        {/* Back button */}
-        <Link href="/players" className="flex items-center gap-1 text-gray-500 hover:text-white text-sm transition-colors" data-testid="link-back-players">
+      <div className="p-4 max-w-xl mx-auto space-y-5 pb-8">
+
+        <Link href="/players" className="flex items-center gap-1 text-gray-400 hover:text-gray-700 text-sm transition-colors" data-testid="link-back-players">
           <ChevronLeft className="w-4 h-4" />
           Players
         </Link>
 
         {/* Player header */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#111] border border-[#222] rounded-2xl p-6"
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-white text-2xl font-bold">{player.firstName} {player.lastName}</h1>
-              <div className="text-gray-500 text-sm mt-1">{player.phone}</div>
-              {stats && stats.totalGames > 0 && (
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-xs text-green-400 font-semibold">{(stats as any)?.wins || 0}W</span>
-                  <span className="text-xs text-gray-600">—</span>
-                  <span className="text-xs text-red-400 font-semibold">{(stats as any)?.losses || 0}L</span>
-                </div>
-              )}
-            </div>
-            <div className={`text-right ${isWinner ? "text-green-400" : isLoser ? "text-red-400" : "text-gray-400"}`}>
-              <div className="text-2xl font-bold">
-                {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-red-600 font-bold text-lg">
+                  {player.firstName[0]}{player.lastName?.[0] || ""}
+                </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">Lifetime P/L</div>
+              <div>
+                <h1 className="text-gray-900 text-xl font-bold">{player.firstName} {player.lastName}</h1>
+                <div className="text-gray-400 text-sm mt-0.5">{player.phone || "No phone"}</div>
+                {stats && stats.totalGames > 0 && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-green-600 font-bold">{s?.wins || 0}W</span>
+                    <span className="text-gray-300 text-xs">—</span>
+                    <span className="text-xs text-red-500 font-bold">{s?.losses || 0}L</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={`text-right flex-shrink-0 ${isWinner ? "text-green-600" : isLoser ? "text-red-500" : "text-gray-400"}`}>
+              <div className="text-2xl font-black">{profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪</div>
+              <div className="text-xs text-gray-400 mt-0.5">Lifetime P/L</div>
             </div>
           </div>
         </motion.div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5">
           {statCards.map((card, i) => (
             <motion.div
               key={card.label}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.04 }}
-              className="bg-[#111] border border-[#222] rounded-xl p-4"
+              className={`bg-white border rounded-2xl p-4 shadow-sm ${card.bg}`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <card.icon className={`w-4 h-4 ${card.color}`} />
-                <span className="text-gray-500 text-xs tracking-wider">{card.label}</span>
+              <div className="flex items-center gap-1.5 mb-2">
+                <card.icon className={`w-3.5 h-3.5 ${card.color}`} />
+                <span className="text-gray-400 text-[10px] tracking-wider font-semibold">{card.label}</span>
               </div>
-              <div className={`text-2xl font-bold ${card.color}`}>
-                {card.value}<span className="text-base">{card.suffix}</span>
+              <div className={`text-2xl font-black ${card.color}`}>
+                {card.value}<span className="text-sm font-semibold">{card.suffix}</span>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Best/Worst session + streaks */}
+        {/* Session Records */}
         {stats && stats.totalGames > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-[#111] border border-[#222] rounded-xl p-4 space-y-4"
+            className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
           >
-            <div className="text-gray-400 text-xs tracking-wider font-semibold">SESSION RECORDS</div>
+            <div className="text-gray-400 text-xs tracking-wider font-bold mb-4">SESSION RECORDS</div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-gray-500 text-xs mb-1">Best Session</div>
-                <div className="text-green-400 font-bold text-xl">+{stats.biggestWin.toFixed(0)} ₪</div>
+                <div className="text-gray-400 text-xs mb-1">Best Session</div>
+                <div className="text-green-600 font-black text-xl">+{stats.biggestWin.toFixed(0)} ₪</div>
               </div>
               <div className="text-right">
-                <div className="text-gray-500 text-xs mb-1">Worst Session</div>
-                <div className="text-red-400 font-bold text-xl">{stats.biggestLoss.toFixed(0)} ₪</div>
+                <div className="text-gray-400 text-xs mb-1">Worst Session</div>
+                <div className="text-red-500 font-black text-xl">{stats.biggestLoss.toFixed(0)} ₪</div>
               </div>
               <div>
-                <div className="text-gray-500 text-xs mb-1">Win Streak Record</div>
-                <div className="text-orange-400 font-bold text-xl flex items-center gap-1">
+                <div className="text-gray-400 text-xs mb-1">Win Streak Record</div>
+                <div className="text-orange-500 font-black text-xl flex items-center gap-1">
                   <Flame className="w-4 h-4" />
-                  {(stats as any)?.longestWinStreak || 0} in a row
+                  {s?.longestWinStreak || 0}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-gray-500 text-xs mb-1">Loss Streak Record</div>
-                <div className="text-red-500 font-bold text-xl">{(stats as any)?.longestLossStreak || 0} in a row</div>
+                <div className="text-gray-400 text-xs mb-1">Loss Streak Record</div>
+                <div className="text-red-400 font-black text-xl">{s?.longestLossStreak || 0}</div>
               </div>
             </div>
           </motion.div>
         )}
 
         {(!stats || stats.totalGames === 0) && (
-          <div className="text-center py-10 text-gray-600">
+          <div className="text-center py-12 text-gray-300">
             <div className="font-cinzel text-xl mb-2">No sessions yet</div>
-            <div className="text-sm">Stats will appear after completing a session</div>
+            <div className="text-sm text-gray-400">Stats appear after a completed session</div>
           </div>
         )}
       </div>

@@ -4,7 +4,7 @@ import { eq, and, desc, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-const CHIPS_RATIO = 2; // 50 NIS = 100 chips, so ratio is 2 chips per NIS
+const CHIPS_RATIO = 2;
 
 function formatSession(s: typeof sessionsTable.$inferSelect) {
   return {
@@ -31,7 +31,7 @@ async function getSessionWithPlayers(sessionId: number) {
     : [];
 
   const buyins = sessionPlayers.length > 0
-    ? await db.select().from(buyinsTable).where(eq(buyinsTable.sessionId, sessionId))
+    ? await db.select().from(buyinsTable).where(eq(buyinsTable.sessionId, sessionId)).orderBy(desc(buyinsTable.createdAt))
     : [];
 
   const playersMap = new Map(players.map(p => [p.id, p]));
@@ -80,7 +80,6 @@ router.get("/sessions", async (req, res) => {
 });
 
 router.post("/sessions", async (req, res) => {
-  // Check for existing active session
   const [existing] = await db.select().from(sessionsTable).where(eq(sessionsTable.status, "active"));
   if (existing) {
     res.status(400).json({ error: "An active session already exists" });
@@ -119,14 +118,12 @@ router.post("/sessions/:id/players", async (req, res) => {
   const sessionId = parseInt(req.params.id);
   const { playerId, initialBuyin } = req.body;
 
-  // Verify session exists and is active
   const [session] = await db.select().from(sessionsTable).where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.status, "active")));
   if (!session) {
     res.status(404).json({ error: "Active session not found" });
     return;
   }
 
-  // Check if player already in session
   const [existing] = await db.select().from(sessionPlayersTable).where(
     and(eq(sessionPlayersTable.sessionId, sessionId), eq(sessionPlayersTable.playerId, playerId))
   );
@@ -143,7 +140,6 @@ router.post("/sessions/:id/players", async (req, res) => {
     finalChips: null,
   }).returning();
 
-  // Also record the buy-in
   await db.insert(buyinsTable).values({
     sessionId,
     playerId,
@@ -172,7 +168,6 @@ router.post("/sessions/:id/buyins", async (req, res) => {
 
   const chips = amount * CHIPS_RATIO;
 
-  // Record buy-in
   const [buyin] = await db.insert(buyinsTable).values({
     sessionId,
     playerId,
@@ -180,7 +175,6 @@ router.post("/sessions/:id/buyins", async (req, res) => {
     chips: String(chips),
   }).returning();
 
-  // Update session player total
   const [sp] = await db.select().from(sessionPlayersTable).where(
     and(eq(sessionPlayersTable.sessionId, sessionId), eq(sessionPlayersTable.playerId, playerId))
   );
@@ -201,6 +195,41 @@ router.post("/sessions/:id/buyins", async (req, res) => {
   });
 });
 
+// DELETE a specific buy-in (undo action)
+router.delete("/sessions/:id/buyins/:buyinId", async (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  const buyinId = parseInt(req.params.buyinId);
+
+  const [session] = await db.select().from(sessionsTable).where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.status, "active")));
+  if (!session) {
+    res.status(404).json({ error: "Active session not found" });
+    return;
+  }
+
+  const [buyin] = await db.select().from(buyinsTable).where(and(eq(buyinsTable.id, buyinId), eq(buyinsTable.sessionId, sessionId)));
+  if (!buyin) {
+    res.status(404).json({ error: "Buy-in not found" });
+    return;
+  }
+
+  const amount = parseFloat(buyin.amount as string);
+
+  await db.delete(buyinsTable).where(eq(buyinsTable.id, buyinId));
+
+  const [sp] = await db.select().from(sessionPlayersTable).where(
+    and(eq(sessionPlayersTable.sessionId, sessionId), eq(sessionPlayersTable.playerId, buyin.playerId))
+  );
+  if (sp) {
+    const currentTotal = parseFloat(sp.totalBuyins as string || "0");
+    const newTotal = Math.max(0, currentTotal - amount);
+    await db.update(sessionPlayersTable)
+      .set({ totalBuyins: String(newTotal) })
+      .where(eq(sessionPlayersTable.id, sp.id));
+  }
+
+  res.json({ success: true, deletedAmount: amount });
+});
+
 router.post("/sessions/:id/close", async (req, res) => {
   const sessionId = parseInt(req.params.id);
   const { finalChips } = req.body as { finalChips: Array<{ playerId: number; chips: number }> };
@@ -218,7 +247,6 @@ router.post("/sessions/:id/close", async (req, res) => {
     : [];
   const playersMap = new Map(players.map(p => [p.id, p]));
 
-  // Update final chips for each player
   for (const fc of finalChips) {
     const sp = sessionPlayers.find(sp => sp.playerId === fc.playerId);
     if (sp) {
@@ -228,7 +256,6 @@ router.post("/sessions/:id/close", async (req, res) => {
     }
   }
 
-  // Calculate settlement
   const playerSettlements = sessionPlayers.map(sp => {
     const player = playersMap.get(sp.playerId);
     const fcEntry = finalChips.find(fc => fc.playerId === sp.playerId);
@@ -236,12 +263,8 @@ router.post("/sessions/:id/close", async (req, res) => {
     const totalBuyinsChips = totalBuyinsAmount * CHIPS_RATIO;
     const finalChipsValue = fcEntry ? fcEntry.chips : 0;
 
-    // profit in chips: finalChips - totalBuyinsChips
-    // convert chips to NIS: chips / CHIPS_RATIO
     const profitChips = finalChipsValue - totalBuyinsChips;
     const profitNIS = profitChips / CHIPS_RATIO;
-
-    // Rake: 10% of net profit only (if profit > 0)
     const rake = profitNIS > 0 ? profitNIS * 0.1 : 0;
     const netProfit = profitNIS - rake;
 
@@ -261,8 +284,6 @@ router.post("/sessions/:id/close", async (req, res) => {
   const totalRake = playerSettlements.reduce((sum, ps) => sum + ps.rake, 0);
   const totalPot = playerSettlements.reduce((sum, ps) => sum + ps.totalBuyins, 0);
 
-  // Calculate "who pays whom" using the min-cash-flow algorithm
-  // Balance = netProfit for each player (negative means they owe)
   const balances = playerSettlements.map(ps => ({
     playerId: ps.playerId,
     name: `${ps.firstName} ${ps.lastName}`,
@@ -276,7 +297,6 @@ router.post("/sessions/:id/close", async (req, res) => {
     amount: number;
   }> = [];
 
-  // Min-cash-flow algorithm
   const debtors = balances.filter(b => b.balance < -0.01).sort((a, b) => a.balance - b.balance);
   const creditors = balances.filter(b => b.balance > 0.01).sort((a, b) => b.balance - a.balance);
 
@@ -287,12 +307,8 @@ router.post("/sessions/:id/close", async (req, res) => {
     const amount = Math.min(-debtor.balance, creditor.balance);
     if (amount > 0.01) {
       transfers.push({
-        fromPlayerId: debtor.playerId,
-        fromName: debtor.name,
-        fromPhone: debtor.phone,
-        toPlayerId: creditor.playerId,
-        toName: creditor.name,
-        toPhone: creditor.phone,
+        fromPlayerId: debtor.playerId, fromName: debtor.name, fromPhone: debtor.phone,
+        toPlayerId: creditor.playerId, toName: creditor.name, toPhone: creditor.phone,
         amount: Math.round(amount * 100) / 100,
       });
     }
@@ -302,24 +318,13 @@ router.post("/sessions/:id/close", async (req, res) => {
     if (Math.abs(creditor.balance) < 0.01) ci++;
   }
 
-  // Close the session
   await db.update(sessionsTable)
     .set({ status: "closed", closedAt: new Date(), totalRake: String(totalRake) })
     .where(eq(sessionsTable.id, sessionId));
 
-  // Record rake in group balance
-  await db.insert(groupBalanceTable).values({
-    sessionId,
-    rake: String(totalRake),
-  });
+  await db.insert(groupBalanceTable).values({ sessionId, rake: String(totalRake) });
 
-  res.json({
-    sessionId,
-    totalPot,
-    totalRake,
-    players: playerSettlements,
-    transfers,
-  });
+  res.json({ sessionId, totalPot, totalRake, players: playerSettlements, transfers });
 });
 
 router.get("/sessions/:id/settlement", async (req, res) => {
@@ -388,12 +393,8 @@ router.get("/sessions/:id/settlement", async (req, res) => {
     const amount = Math.min(-debtor.balance, creditor.balance);
     if (amount > 0.01) {
       transfers.push({
-        fromPlayerId: debtor.playerId,
-        fromName: debtor.name,
-        fromPhone: debtor.phone,
-        toPlayerId: creditor.playerId,
-        toName: creditor.name,
-        toPhone: creditor.phone,
+        fromPlayerId: debtor.playerId, fromName: debtor.name, fromPhone: debtor.phone,
+        toPlayerId: creditor.playerId, toName: creditor.name, toPhone: creditor.phone,
         amount: Math.round(amount * 100) / 100,
       });
     }

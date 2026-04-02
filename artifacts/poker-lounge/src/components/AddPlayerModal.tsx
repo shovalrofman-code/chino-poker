@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useSearchPlayers, useCreatePlayer } from "@workspace/api-client-react";
-import { UserPlus, UserCheck } from "lucide-react";
+import { UserPlus, UserCheck, Search } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListPlayersQueryKey, getGetActiveSessionQueryKey } from "@workspace/api-client-react";
 
@@ -60,42 +60,39 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
   };
 
   const handleClose = () => {
-    setSearchQuery("");
-    setSelectedPlayer(null);
-    setIsGuest(false);
-    setFirstName("");
-    setLastName("");
-    setPhone("");
-    setInitialBuyin(50);
+    setSearchQuery(""); setSelectedPlayer(null); setIsGuest(false);
+    setFirstName(""); setLastName(""); setPhone(""); setInitialBuyin(50);
     onClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#111] border border-[#333] text-white max-w-md">
+      <DialogContent className="bg-white border border-gray-200 max-w-md shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-[#D4AF37] text-lg tracking-widest flex items-center gap-2">
-            <UserPlus className="w-5 h-5" />
-            ADD PLAYER
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+              <UserPlus className="w-4 h-4 text-red-600" />
+            </div>
+            ADD TO TABLE
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Guest toggle */}
-          <div className="flex items-center gap-3">
+          {/* Regular / Guest toggle */}
+          <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
             <button
               type="button"
               onClick={() => { setIsGuest(false); setSelectedPlayer(null); setSearchQuery(""); }}
-              className={`flex-1 py-2 rounded text-sm font-semibold tracking-wider transition-all ${!isGuest ? "casino-btn text-white" : "bg-[#1a1a1a] text-gray-400 border border-[#333]"}`}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold tracking-wider transition-all flex items-center justify-center gap-1.5 ${!isGuest ? "bg-white shadow text-gray-900 border border-gray-200" : "text-gray-400"}`}
               data-testid="button-regular-player"
             >
-              <UserCheck className="w-4 h-4 inline mr-1" />
+              <UserCheck className="w-3.5 h-3.5" />
               REGULAR
             </button>
             <button
               type="button"
               onClick={() => { setIsGuest(true); setSelectedPlayer(null); setSearchQuery(""); }}
-              className={`flex-1 py-2 rounded text-sm font-semibold tracking-wider transition-all ${isGuest ? "casino-btn text-white" : "bg-[#1a1a1a] text-gray-400 border border-[#333]"}`}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold tracking-wider transition-all ${isGuest ? "bg-white shadow text-gray-900 border border-gray-200" : "text-gray-400"}`}
               data-testid="button-guest-player"
             >
               GUEST
@@ -104,119 +101,96 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
 
           {!isGuest ? (
             <div className="space-y-2">
-              <Label className="text-gray-400 text-xs tracking-wider">SEARCH EXISTING PLAYER</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold">SEARCH PLAYER</Label>
               <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Type a name..."
+                  placeholder="Type name or phone..."
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setSelectedPlayer(null); }}
-                  className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600 focus:border-red-600"
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 pl-9 focus:border-red-400 focus:ring-red-100"
                   data-testid="input-search-player"
                 />
                 {searchResults && searchResults.length > 0 && !selectedPlayer && (
-                  <div className="absolute top-full left-0 right-0 z-50 bg-[#1a1a1a] border border-[#333] rounded-b-lg mt-0.5 shadow-xl max-h-40 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-44 overflow-y-auto">
                     {searchResults.map(p => (
                       <button
                         key={p.id}
                         type="button"
-                        className="w-full text-left px-3 py-2 hover:bg-[#2a2a2a] text-white text-sm"
+                        className="w-full text-left px-3 py-2.5 hover:bg-gray-50 text-gray-900 text-sm border-b border-gray-50 last:border-0"
                         onClick={() => handleSelectPlayer(p)}
                         data-testid={`option-player-${p.id}`}
                       >
                         <span className="font-semibold">{p.firstName} {p.lastName}</span>
-                        <span className="text-gray-500 ml-2 text-xs">{p.phone}</span>
+                        {p.phone && <span className="text-gray-400 ml-2 text-xs">{p.phone}</span>}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
               {selectedPlayer && (
-                <div className="bg-[#1a2a1a] border border-green-800 rounded p-2 text-sm">
-                  <span className="text-green-400">Selected: </span>
-                  <span className="text-white font-semibold">{selectedPlayer.firstName} {selectedPlayer.lastName}</span>
-                  <span className="text-gray-400 ml-2 text-xs">{selectedPlayer.phone}</span>
+                <div className="bg-green-50 border border-green-200 rounded-xl p-2.5 text-sm flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-xs">{selectedPlayer.firstName[0]}</span>
+                  </div>
+                  <div>
+                    <span className="text-green-700 font-semibold">{selectedPlayer.firstName} {selectedPlayer.lastName}</span>
+                    {selectedPlayer.phone && <span className="text-green-500 ml-2 text-xs">{selectedPlayer.phone}</span>}
+                  </div>
                 </div>
               )}
               {searchQuery && !selectedPlayer && searchResults?.length === 0 && (
-                <div className="space-y-2 pt-1">
-                  <Label className="text-gray-500 text-xs">NOT FOUND - CREATE NEW:</Label>
+                <div className="space-y-2 bg-gray-50 border border-gray-200 rounded-xl p-3">
+                  <Label className="text-gray-400 text-xs font-semibold">NOT FOUND — CREATE NEW</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      placeholder="First name"
-                      value={firstName}
-                      onChange={e => setFirstName(e.target.value)}
-                      className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600"
-                      data-testid="input-first-name"
-                    />
-                    <Input
-                      placeholder="Last name"
-                      value={lastName}
-                      onChange={e => setLastName(e.target.value)}
-                      className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600"
-                      data-testid="input-last-name"
-                    />
+                    <Input placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)}
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-first-name" />
+                    <Input placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)}
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-last-name" />
                   </div>
-                  <Input
-                    placeholder="Phone number"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600"
-                    data-testid="input-phone"
-                  />
+                  <Input placeholder="Phone number" value={phone} onChange={e => setPhone(e.target.value)}
+                    className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-phone" />
                 </div>
               )}
             </div>
           ) : (
             <div className="space-y-2">
-              <Label className="text-gray-400 text-xs tracking-wider">GUEST PLAYER DETAILS</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold">GUEST DETAILS</Label>
               <div className="grid grid-cols-2 gap-2">
-                <Input
-                  placeholder="First name"
-                  value={firstName}
-                  onChange={e => setFirstName(e.target.value)}
-                  className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600"
-                  required
-                  data-testid="input-guest-first-name"
-                />
-                <Input
-                  placeholder="Last name"
-                  value={lastName}
-                  onChange={e => setLastName(e.target.value)}
-                  className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600"
-                  data-testid="input-guest-last-name"
-                />
+                <Input placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)}
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" required data-testid="input-guest-first-name" />
+                <Input placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)}
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-guest-last-name" />
               </div>
             </div>
           )}
 
-          {/* Initial Buy-in */}
+          {/* Buy-in amount */}
           <div className="space-y-2">
-            <Label className="text-gray-400 text-xs tracking-wider">INITIAL BUY-IN (NIS)</Label>
+            <Label className="text-gray-400 text-xs tracking-wider font-semibold">INITIAL BUY-IN</Label>
             <div className="flex gap-2">
               {[50, 100, 200].map(amount => (
                 <button
                   key={amount}
                   type="button"
                   onClick={() => setInitialBuyin(amount)}
-                  className={`flex-1 py-2 rounded text-sm font-bold transition-all ${initialBuyin === amount ? "casino-btn text-white" : "bg-[#1a1a1a] text-gray-300 border border-[#333]"}`}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border ${initialBuyin === amount ? "casino-btn border-red-600" : "bg-gray-50 text-gray-600 border-gray-200 hover:border-red-300"}`}
                   data-testid={`button-buyin-${amount}`}
                 >
                   {amount} ₪
                 </button>
               ))}
             </div>
-            <div className="text-center text-gray-500 text-xs">
-              = {initialBuyin * 2} chips (ratio 1:2)
-            </div>
+            <div className="text-center text-gray-400 text-xs">{initialBuyin * 2} chips (1:2 ratio)</div>
           </div>
 
           <Button
             type="submit"
             disabled={loading || (!selectedPlayer && !isGuest && !firstName && !searchQuery)}
-            className="casino-btn w-full text-white font-bold tracking-widest py-3"
+            className="casino-btn w-full font-bold tracking-widest py-3"
             data-testid="button-confirm-add-player"
           >
-            {loading ? "ADDING..." : "ADD TO TABLE"}
+            {loading ? "Adding..." : "ADD TO TABLE"}
           </Button>
         </form>
       </DialogContent>

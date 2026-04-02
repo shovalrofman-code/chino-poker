@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
 import { AdminLoginModal } from "@/components/AdminLoginModal";
 import { useState } from "react";
-import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LeaderboardPage() {
@@ -14,77 +14,87 @@ export default function LeaderboardPage() {
   const { data: leaderboard } = useGetLeaderboard({ query: { queryKey: getGetLeaderboardQueryKey() } });
   const { data: groupBalance } = useGetGroupBalance({ query: { queryKey: getGetGroupBalanceQueryKey() } });
 
-  const medalColors = ["text-white", "text-gray-300", "text-amber-600"];
-
   return (
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
-      <div className="p-4 max-w-2xl mx-auto space-y-5">
+      <div className="p-4 max-w-xl mx-auto space-y-4 pb-8">
         <div className="pt-2">
-          <h1 className="font-cinzel text-white text-xl font-bold tracking-widest">LEADERBOARD</h1>
-          <p className="text-gray-500 text-xs mt-1">All-time rankings</p>
+          <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">LEADERBOARD</h1>
+          <p className="text-gray-400 text-xs mt-0.5">All-time rankings</p>
         </div>
 
-        {/* Group Balance Card */}
+        {/* Group Treasury Card */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-[#0d0d0d] to-[#111] border border-red-600/30 rounded-2xl p-5 text-center"
+          className="bg-red-600 rounded-2xl p-5 text-center"
         >
-          <div className="text-gray-400 text-xs tracking-widest font-bold mb-2">GROUP TREASURY</div>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Wallet className="w-4 h-4 text-red-200" />
+            <div className="text-red-100 text-xs font-bold tracking-widest">GROUP TREASURY</div>
+          </div>
           <div className="text-white text-4xl font-cinzel font-black">
             {(groupBalance?.totalRake || 0).toFixed(0)} ₪
           </div>
-          <div className="text-gray-600 text-xs mt-1">
-            from {groupBalance?.sessionsCount || 0} sessions
+          <div className="text-red-200 text-xs mt-1">
+            from {groupBalance?.sessionsCount || 0} sessions of rake
           </div>
         </motion.div>
 
-        {/* Leaderboard */}
+        {/* Rankings */}
         <div className="space-y-2">
           {leaderboard?.map((player, i) => (
             <motion.div
               key={player.playerId}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
             >
               <Link
                 href={`/player/${player.playerId}`}
-                className="flex items-center gap-4 bg-[#111] border border-[#222] hover:border-red-600/20 rounded-xl p-4 transition-all"
+                className="flex items-center gap-3 bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all"
                 data-testid={`leaderboard-row-${player.playerId}`}
               >
-                  {/* Rank */}
-                  <div className={`text-xl font-black font-cinzel w-8 text-center ${medalColors[i] || "text-gray-600"}`}>
-                    {i < 3 ? (
-                      <Trophy className={`w-5 h-5 mx-auto ${medalColors[i]}`} />
-                    ) : (
-                      <span className="text-gray-600">#{i + 1}</span>
-                    )}
-                  </div>
+                {/* Rank badge */}
+                <div className="w-8 flex-shrink-0 text-center">
+                  {i === 0 ? (
+                    <Trophy className="w-5 h-5 mx-auto text-yellow-500" />
+                  ) : i === 1 ? (
+                    <Trophy className="w-5 h-5 mx-auto text-gray-400" />
+                  ) : i === 2 ? (
+                    <Trophy className="w-5 h-5 mx-auto text-amber-700" />
+                  ) : (
+                    <span className="text-gray-400 font-bold text-sm">#{i + 1}</span>
+                  )}
+                </div>
 
-                  {/* Player info */}
-                  <div className="flex-1">
-                    <div className="text-white font-semibold">{player.firstName} {player.lastName}</div>
-                    <div className="text-gray-500 text-xs">{player.totalGames} games • {player.winRate.toFixed(0)}% wins</div>
-                  </div>
+                {/* Avatar */}
+                <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-600 font-bold text-sm">
+                    {player.firstName[0]}{player.lastName?.[0] || ""}
+                  </span>
+                </div>
 
-                  {/* Profit */}
-                  <div className="text-right">
-                    <div className={`font-black text-lg flex items-center gap-1 justify-end ${player.totalProfit > 0 ? "text-green-400" : player.totalProfit < 0 ? "text-red-400" : "text-gray-400"}`}>
-                      {player.totalProfit > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                      {player.totalProfit > 0 ? "+" : ""}{player.totalProfit.toFixed(0)} ₪
-                    </div>
-                  </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
+                  <div className="text-gray-400 text-xs">{player.totalGames} games · {player.winRate.toFixed(0)}% wins</div>
+                </div>
+
+                {/* Profit */}
+                <div className={`font-black text-base flex items-center gap-1 flex-shrink-0 ${player.totalProfit > 0 ? "text-green-600" : player.totalProfit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                  {player.totalProfit > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  {player.totalProfit > 0 ? "+" : ""}{player.totalProfit.toFixed(0)} ₪
+                </div>
               </Link>
             </motion.div>
           ))}
         </div>
 
         {(!leaderboard || leaderboard.length === 0) && (
-          <div className="text-center py-16 text-gray-600">
-            <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <div className="font-cinzel text-xl mb-2">No rankings yet</div>
-            <div className="text-sm">Complete a session to see the leaderboard</div>
+          <div className="text-center py-16">
+            <Trophy className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+            <div className="font-cinzel text-gray-300 text-xl mb-1">No rankings yet</div>
+            <div className="text-gray-400 text-sm">Complete a session to see the leaderboard</div>
           </div>
         )}
       </div>

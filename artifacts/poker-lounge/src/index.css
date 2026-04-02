@@ -11,41 +11,27 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-card-border: hsl(var(--card-border));
-
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-popover-border: hsl(var(--popover-border));
-
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary-border: var(--primary-border);
-
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-secondary-border: var(--secondary-border);
-
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-muted-border: var(--muted-border);
-
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-accent-border: var(--accent-border);
-
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-destructive-border: var(--destructive-border);
-
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
@@ -56,11 +42,9 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
-
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -68,166 +52,169 @@
 }
 
 :root {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(0,0,0,.08);
+  --badge-outline: rgba(0,0,0,.05);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(0,0,0,.03);
+  --elevate-2: rgba(0,0,0,.06);
 
-  /* Dark casino theme */
-  --background: 0 0% 8%;
-  --foreground: 0 0% 98%;
-  --border: 0 0% 20%;
-  --card: 0 0% 11%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 0 0% 22%;
-  --sidebar: 0 0% 7%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 18%;
+  /* White fintech theme */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --border: 0 0% 90%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 9%;
+  --card-border: 0 0% 88%;
+  --sidebar: 0 0% 98%;
+  --sidebar-foreground: 0 0% 9%;
+  --sidebar-border: 0 0% 88%;
   --sidebar-primary: 0 72% 51%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 0 0% 15%;
-  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 95%;
+  --sidebar-accent-foreground: 0 0% 9%;
   --sidebar-ring: 0 72% 51%;
-  --popover: 0 0% 10%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 0 0% 22%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --popover-border: 0 0% 88%;
   --primary: 0 72% 51%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 15%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 43 74% 49%;
-  --accent-foreground: 0 0% 8%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 72% 51%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --input: 0 0% 20%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 0 0% 90%;
   --ring: 0 72% 51%;
-  --chart-1: 0 72% 51%;
-  --chart-2: 43 74% 49%;
-  --chart-3: 142 71% 45%;
-  --chart-4: 217 91% 60%;
-  --chart-5: 271 91% 65%;
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: 'Cinzel', serif;
   --app-font-mono: Menlo, monospace;
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  --shadow-2xs: 0px 2px 0px 0px rgba(0,0,0, 0.5);
-  --shadow-xs: 0px 2px 0px 0px rgba(0,0,0, 0.5);
-  --shadow-sm: 0px 2px 4px 0px rgba(0,0,0, 0.5), 0px 1px 2px -1px rgba(0,0,0, 0.5);
-  --shadow: 0px 2px 4px 0px rgba(0,0,0, 0.5), 0px 1px 2px -1px rgba(0,0,0, 0.5);
-  --shadow-md: 0px 2px 4px 0px rgba(0,0,0, 0.5), 0px 2px 4px -1px rgba(0,0,0, 0.5);
-  --shadow-lg: 0px 4px 8px 0px rgba(0,0,0, 0.6), 0px 4px 6px -1px rgba(0,0,0, 0.6);
-  --shadow-xl: 0px 8px 16px 0px rgba(0,0,0, 0.7), 0px 8px 10px -1px rgba(0,0,0, 0.7);
-  --shadow-2xl: 0px 16px 32px 0px rgba(0,0,0, 0.8);
+  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.06);
+  --shadow-xs: 0px 1px 3px 0px rgba(0,0,0,0.08);
+  --shadow-sm: 0px 2px 6px 0px rgba(0,0,0,0.08);
+  --shadow: 0px 4px 12px 0px rgba(0,0,0,0.08);
+  --shadow-md: 0px 6px 16px 0px rgba(0,0,0,0.1);
+  --shadow-lg: 0px 12px 32px 0px rgba(0,0,0,0.12);
+  --shadow-xl: 0px 20px 48px 0px rgba(0,0,0,0.14);
+  --shadow-2xl: 0px 32px 64px 0px rgba(0,0,0,0.16);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
   --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-  }
+  * { @apply border-border; }
+  body { @apply font-sans antialiased bg-background text-foreground; }
 }
 
-/* Custom casino styles */
-.font-cinzel {
-  font-family: 'Cinzel', serif;
-}
+/* Fonts */
+.font-cinzel { font-family: 'Cinzel', serif; }
 
+/* Casino Red Oval Table */
 .poker-table {
-  background: radial-gradient(ellipse at center, #1a0505 0%, #110202 50%, #0a0101 100%);
-  border: 8px solid #3a0a0a;
-  box-shadow: 
-    0 0 0 2px #DC2626,
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 20px 60px rgba(0,0,0,0.9);
+  background: radial-gradient(ellipse at 50% 40%, #C91A2E 0%, #991020 45%, #700A16 80%, #55060F 100%);
+  border: 6px solid #7a0a18;
+  box-shadow:
+    0 0 0 3px rgba(220, 38, 38, 0.25),
+    0 0 0 5px rgba(120, 10, 20, 0.15),
+    inset 0 0 80px rgba(0,0,0,0.25),
+    0 24px 64px rgba(180, 10, 30, 0.25),
+    0 8px 24px rgba(0,0,0,0.15);
 }
 
+/* Player seat cards */
 .seat-card {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 1.5px solid rgba(220, 38, 38, 0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: all 0.15s ease;
 }
 
 .seat-card:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 15px rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.6);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
+  transform: translateY(-1px);
 }
 
 .seat-card.active-seat {
-  border-color: rgba(220, 38, 38, 0.7);
-}
-
-.gold-text {
-  color: #ffffff;
-}
-
-.gold-border {
   border-color: #DC2626;
+  box-shadow: 0 0 0 2px rgba(220,38,38,0.3), 0 4px 16px rgba(220,38,38,0.25);
 }
 
-.casino-btn {
-  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-  border: 1px solid rgba(220, 38, 38, 0.5);
-  transition: all 0.2s ease;
-}
-
-.casino-btn:hover {
-  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
-  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
-}
-
-.admin-badge {
-  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-  animation: pulse 2s infinite;
-}
-
+/* Logo shimmer — red/white */
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
 
 .logo-shimmer {
-  background: linear-gradient(90deg, #ffffff 0%, #DC2626 30%, #ffffff 60%, #ff6666 100%);
+  background: linear-gradient(90deg, #ffffff 0%, #fecaca 35%, #ffffff 60%, #fca5a5 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s linear infinite;
+  animation: shimmer 5s linear infinite;
+}
+
+/* Primary red button */
+.casino-btn {
+  background: #DC2626;
+  border: 1px solid #B91C1C;
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+.casino-btn:hover:not(:disabled) {
+  background: #B91C1C;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.35);
+}
+.casino-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Card base (white fintech) */
+.fintech-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* Secondary button */
+.sec-btn {
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  color: #374151;
+  transition: all 0.15s ease;
+}
+.sec-btn:hover {
+  border-color: #DC2626;
+  color: #DC2626;
+}
+
+.admin-badge {
+  background: #DC2626;
+  animation: pulse 2s infinite;
 }
 
 .chip-display {
-  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
 }
 
 @layer utilities {
-  input[type="search"]::-webkit-search-cancel-button {
-    @apply hidden;
-  }
+  input[type="search"]::-webkit-search-cancel-button { @apply hidden; }
 
   [contenteditable][data-placeholder]:empty::before {
     content: attr(data-placeholder);
@@ -248,13 +235,8 @@
     z-index: -1;
   }
 
-  .toggle-elevate.toggle-elevated::before {
-    background-color: var(--elevate-2);
-  }
-
-  .border.toggle-elevate::before {
-    inset: -1px;
-  }
+  .toggle-elevate.toggle-elevated::before { background-color: var(--elevate-2); }
+  .border.toggle-elevate::before { inset: -1px; }
 
   .hover-elevate:not(.no-default-hover-elevate),
   .active-elevate:not(.no-default-active-elevate),
@@ -277,20 +259,14 @@
   }
 
   .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-1);
-  }
+  .active-elevate:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-1); }
 
   .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-2);
-  }
+  .active-elevate-2:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-2); }
 
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
-    inset: -1px;
-  }
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after { inset: -1px; }
 }

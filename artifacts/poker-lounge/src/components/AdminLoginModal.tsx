@@ -29,10 +29,12 @@ export function AdminLoginModal({ open, onClose, onLogin }: AdminLoginModalProps
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111] border border-[#333] text-white max-w-sm">
+      <DialogContent className="bg-white border border-gray-200 max-w-sm shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-[#D4AF37] text-lg tracking-widest flex items-center gap-2">
-            <Lock className="w-5 h-5" />
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+              <Lock className="w-4 h-4 text-red-600" />
+            </div>
             ADMIN ACCESS
           </DialogTitle>
         </DialogHeader>
@@ -42,7 +44,7 @@ export function AdminLoginModal({ open, onClose, onLogin }: AdminLoginModalProps
             placeholder="Enter admin password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-600 focus:border-red-600"
+            className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100"
             data-testid="input-admin-password"
             autoFocus
           />
@@ -51,7 +53,7 @@ export function AdminLoginModal({ open, onClose, onLogin }: AdminLoginModalProps
           )}
           <Button
             type="submit"
-            className="casino-btn w-full text-white font-semibold tracking-wider"
+            className="casino-btn w-full font-semibold tracking-wider"
             data-testid="button-admin-login"
           >
             ENTER

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { DoorClosed } from "lucide-react";
 
 interface PlayerEntry {
@@ -38,39 +37,45 @@ export function CloseSessionModal({ open, onClose, players, onClose2 }: CloseSes
     }
   };
 
-  const totalBuyins = players.reduce((sum, p) => sum + p.totalBuyins, 0);
-  const totalBuyinsChips = totalBuyins * 2;
+  const totalBuyinsChips = players.reduce((sum, p) => sum + p.totalBuyins * 2, 0);
   const enteredChips = players.reduce((sum, p) => sum + parseFloat(chips[p.playerId] || "0"), 0);
   const chipsDiff = enteredChips - totalBuyinsChips;
+  const balanced = Math.abs(chipsDiff) < 1;
+  const allFilled = players.every(p => chips[p.playerId] && chips[p.playerId] !== "");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-[#111] border border-[#333] text-white max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white border border-gray-200 max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-[#D4AF37] text-lg tracking-widest flex items-center gap-2">
-            <DoorClosed className="w-5 h-5" />
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
+              <DoorClosed className="w-4 h-4 text-red-600" />
+            </div>
             CLOSE SESSION
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <div className="text-gray-400 text-xs tracking-wider">
-            ENTER FINAL CHIP COUNT PER PLAYER
-          </div>
+          <p className="text-gray-400 text-xs tracking-wider font-semibold">ENTER FINAL CHIP COUNT</p>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {players.map(player => (
-              <div key={player.playerId} className="flex items-center gap-3 bg-[#1a1a1a] rounded p-3">
-                <div className="flex-1">
-                  <div className="text-white font-semibold text-sm">{player.firstName} {player.lastName}</div>
-                  <div className="text-gray-500 text-xs">Buyins: <span className="text-[#D4AF37]">{player.totalBuyins} ₪</span> = {player.totalBuyins * 2} chips</div>
+              <div key={player.playerId} className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-600 font-bold text-xs">
+                    {player.firstName[0]}{player.lastName?.[0] || ""}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
+                  <div className="text-gray-400 text-xs">{player.totalBuyins} ₪ = {player.totalBuyins * 2} chips</div>
                 </div>
                 <Input
                   type="number"
                   placeholder="0"
                   value={chips[player.playerId] || ""}
                   onChange={e => setChips(prev => ({ ...prev, [player.playerId]: e.target.value }))}
-                  className="w-28 bg-[#0a0a0a] border-[#333] text-white text-center font-bold"
+                  className="w-24 bg-white border-gray-200 text-gray-900 text-center font-bold focus:border-red-400 focus:ring-red-100"
                   min={0}
                   data-testid={`input-final-chips-${player.playerId}`}
                 />
@@ -78,30 +83,33 @@ export function CloseSessionModal({ open, onClose, players, onClose2 }: CloseSes
             ))}
           </div>
 
-          {/* Chip balance check */}
-          <div className={`rounded p-3 text-sm ${Math.abs(chipsDiff) < 1 ? "bg-green-900/30 border border-green-800" : "bg-red-900/20 border border-red-900"}`}>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Total chips in:</span>
-              <span className="text-white font-bold">{totalBuyinsChips}</span>
+          {/* Chip balance checker */}
+          <div className={`rounded-xl p-3 text-sm border ${balanced ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 text-xs">Chips in play</span>
+              <span className="text-gray-700 font-bold">{totalBuyinsChips}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Total chips entered:</span>
-              <span className={`font-bold ${Math.abs(chipsDiff) < 1 ? "text-green-400" : "text-red-400"}`}>{enteredChips}</span>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-gray-500 text-xs">Chips entered</span>
+              <span className={`font-bold ${balanced ? "text-green-600" : "text-red-500"}`}>{enteredChips}</span>
             </div>
-            {Math.abs(chipsDiff) >= 1 && (
-              <div className="text-red-400 text-xs mt-1">
-                Difference: {chipsDiff > 0 ? "+" : ""}{chipsDiff.toFixed(0)} chips
+            {!balanced && enteredChips > 0 && (
+              <div className="text-red-500 text-xs mt-1.5 font-semibold">
+                ⚠️ Difference: {chipsDiff > 0 ? "+" : ""}{chipsDiff.toFixed(0)} chips
               </div>
+            )}
+            {balanced && allFilled && (
+              <div className="text-green-600 text-xs mt-1.5 font-semibold">✅ Chips balance correctly</div>
             )}
           </div>
 
           <Button
             type="submit"
-            disabled={loading || players.some(p => !chips[p.playerId])}
-            className="casino-btn w-full text-white font-bold tracking-widest py-3"
+            disabled={loading || !allFilled}
+            className="casino-btn w-full font-bold tracking-widest py-3"
             data-testid="button-confirm-close-session"
           >
-            {loading ? "CALCULATING..." : "CLOSE & SETTLE"}
+            {loading ? "Calculating..." : "CLOSE & SETTLE"}
           </Button>
         </form>
       </DialogContent>

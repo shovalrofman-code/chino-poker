@@ -32,7 +32,7 @@ router.get("/players/search", async (req, res) => {
         ilike(playersTable.phone, `%${q}%`)
       )
     )
-    .limit(10);
+    .limit(50);
   res.json(players.map(p => ({
     id: p.id,
     firstName: p.firstName,
