@@ -407,6 +407,29 @@ router.get("/sessions/:id/settlement", async (req, res) => {
   res.json({ sessionId, totalPot, totalRake, players: playerSettlements, transfers });
 });
 
+// Delete a closed session (admin action) — cascades related records manually
+router.delete("/sessions/:id", async (req, res) => {
+  const sessionId = parseInt(req.params.id);
+
+  const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, sessionId));
+  if (!session) {
+    res.status(404).json({ error: "Session not found" });
+    return;
+  }
+  if (session.status === "active") {
+    res.status(400).json({ error: "Cannot delete an active session" });
+    return;
+  }
+
+  // Delete child records first (no cascade in schema)
+  await db.delete(buyinsTable).where(eq(buyinsTable.sessionId, sessionId));
+  await db.delete(sessionPlayersTable).where(eq(sessionPlayersTable.sessionId, sessionId));
+  await db.delete(groupBalanceTable).where(eq(groupBalanceTable.sessionId, sessionId));
+  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+
+  res.json({ success: true, deletedId: sessionId });
+});
+
 router.get("/group-balance", async (req, res) => {
   const result = await db
     .select({ totalRake: sql<number>`COALESCE(SUM(${groupBalanceTable.rake}::numeric), 0)`, sessionsCount: sql<number>`COUNT(*)` })
