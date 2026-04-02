@@ -33,33 +33,35 @@ export default function PlayersPage() {
 
         {/* Header */}
         <div className="pt-2 flex items-center justify-between">
-          <div>
-            <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">PLAYERS</h1>
-            <p className="text-gray-400 text-xs mt-0.5">{filtered.length} registered</p>
+          <div className="flex items-center gap-2">
+            {adminMode && (
+              <button
+                onClick={() => setShowRegister(true)}
+                className="casino-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide"
+                data-testid="button-register-player"
+              >
+                <UserPlus className="w-4 h-4" />
+                הוסף שחקן
+              </button>
+            )}
           </div>
-          {adminMode && (
-            <button
-              onClick={() => setShowRegister(true)}
-              className="casino-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide"
-              data-testid="button-register-player"
-            >
-              <UserPlus className="w-4 h-4" />
-              Add Player
-            </button>
-          )}
+          <div className="text-right">
+            <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">שחקנים</h1>
+            <p className="text-gray-400 text-xs mt-0.5">{filtered.length} רשומים</p>
+          </div>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="search"
-            placeholder="Search by name or phone..."
+            placeholder="חפש לפי שם או טלפון..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pr-9 pl-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all text-right"
             data-testid="input-search-players"
           />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
 
         {/* Player list */}
@@ -79,34 +81,34 @@ export default function PlayersPage() {
               >
                 <Link
                   href={`/player/${player.id}`}
-                  className="flex items-center justify-between bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all cursor-pointer block"
+                  className="flex items-center justify-between bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all cursor-pointer"
                   data-testid={`card-player-${player.id}`}
                 >
+                  <div className="text-left flex-shrink-0 ml-3">
+                    {games > 0 ? (
+                      <>
+                        <div className={`font-bold text-sm flex items-center gap-1 ${profit > 0 ? "text-green-600" : profit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                          {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                          {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
+                        </div>
+                        <div className="text-gray-400 text-xs">{games} משחקים · {winRate.toFixed(0)}% ניצחון</div>
+                      </>
+                    ) : (
+                      <div className="text-gray-300 text-xs">אין משחקים</div>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 min-w-0">
+                    <div className="min-w-0 text-right">
+                      <div className="text-gray-900 font-semibold text-sm truncate">
+                        {player.firstName} {player.lastName}
+                      </div>
+                      <div className="text-gray-400 text-xs truncate">{player.phone || "אין טלפון"}</div>
+                    </div>
                     <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
                       <span className="text-red-600 font-bold text-sm">
                         {player.firstName[0]}{player.lastName?.[0] || ""}
                       </span>
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-gray-900 font-semibold text-sm truncate">
-                        {player.firstName} {player.lastName}
-                      </div>
-                      <div className="text-gray-400 text-xs truncate">{player.phone || "No phone"}</div>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-3">
-                    {games > 0 ? (
-                      <>
-                        <div className={`font-bold text-sm flex items-center gap-1 justify-end ${profit > 0 ? "text-green-600" : profit < 0 ? "text-red-500" : "text-gray-400"}`}>
-                          {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
-                          {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
-                        </div>
-                        <div className="text-gray-400 text-xs">{games}g · {winRate.toFixed(0)}%W</div>
-                      </>
-                    ) : (
-                      <div className="text-gray-300 text-xs">No games</div>
-                    )}
                   </div>
                 </Link>
               </motion.div>
@@ -116,17 +118,17 @@ export default function PlayersPage() {
 
         {filtered.length === 0 && !search && (
           <div className="text-center py-16 text-gray-300">
-            <div className="font-cinzel text-2xl mb-2 text-gray-300">No players yet</div>
+            <div className="font-cinzel text-2xl mb-2 text-gray-300">אין שחקנים עדיין</div>
             {adminMode
-              ? <button onClick={() => setShowRegister(true)} className="text-red-500 font-semibold text-sm underline">Add your first player</button>
-              : <div className="text-sm text-gray-400">Login as admin to add players</div>
+              ? <button onClick={() => setShowRegister(true)} className="text-red-500 font-semibold text-sm underline">הוסף את השחקן הראשון</button>
+              : <div className="text-sm text-gray-400">כנס כמנהל להוספת שחקנים</div>
             }
           </div>
         )}
 
         {filtered.length === 0 && search && (
           <div className="text-center py-10 text-gray-400 text-sm">
-            No players match "{search}"
+            לא נמצאו שחקנים עבור "{search}"
           </div>
         )}
       </div>

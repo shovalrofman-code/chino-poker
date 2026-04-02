@@ -30,7 +30,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName.trim()) { setError("First name is required"); return; }
+    if (!firstName.trim()) { setError("שם פרטי הוא שדה חובה"); return; }
     setLoading(true); setError("");
     try {
       await createPlayer.mutateAsync({
@@ -39,7 +39,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
       queryClient.invalidateQueries({ queryKey: getListPlayersQueryKey() });
       handleClose();
     } catch {
-      setError("Failed to add player. Try again.");
+      setError("שגיאה בהוספת שחקן. נסה שוב.");
     } finally {
       setLoading(false);
     }
@@ -49,52 +49,52 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-white border border-gray-200 max-w-sm shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2 justify-end">
+            שחקן חדש
             <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
               <UserPlus className="w-4 h-4 text-red-600" />
             </div>
-            NEW PLAYER
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-gray-400 text-xs tracking-wider font-semibold">FIRST NAME *</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">שם משפחה</Label>
               <Input
-                placeholder="Israel"
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100"
-                autoFocus
-                data-testid="input-reg-first-name"
+                placeholder="ישראלי"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100 text-right"
+                data-testid="input-reg-last-name"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-gray-400 text-xs tracking-wider font-semibold">LAST NAME</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">שם פרטי *</Label>
               <Input
-                placeholder="Israeli"
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100"
-                data-testid="input-reg-last-name"
+                placeholder="ישראל"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100 text-right"
+                autoFocus
+                data-testid="input-reg-first-name"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <Label className="text-gray-400 text-xs tracking-wider font-semibold">PHONE</Label>
+            <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">טלפון</Label>
             <Input
               placeholder="050-0000000"
               value={phone}
               onChange={e => setPhone(e.target.value)}
               type="tel"
-              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100"
+              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 focus:ring-red-100 text-right"
               data-testid="input-reg-phone"
             />
           </div>
 
-          {error && <div className="text-red-500 text-xs text-center">{error}</div>}
+          {error && <div className="text-red-500 text-xs text-right">{error}</div>}
 
           <Button
             type="submit"
@@ -102,7 +102,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
             className="casino-btn w-full font-bold tracking-widest py-3"
             data-testid="button-confirm-register-player"
           >
-            {loading ? "Adding..." : "ADD TO REGISTRY"}
+            {loading ? "מוסיף..." : "הוסף למאגר"}
           </Button>
         </form>
       </DialogContent>

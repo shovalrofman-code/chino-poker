@@ -17,9 +17,9 @@ export default function LeaderboardPage() {
   return (
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
       <div className="p-4 max-w-xl mx-auto space-y-4 pb-8">
-        <div className="pt-2">
-          <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">LEADERBOARD</h1>
-          <p className="text-gray-400 text-xs mt-0.5">All-time rankings</p>
+        <div className="pt-2 text-right">
+          <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">טבלת מובילים</h1>
+          <p className="text-gray-400 text-xs mt-0.5">דירוג כל הזמנים</p>
         </div>
 
         {/* Group Treasury Card */}
@@ -30,13 +30,13 @@ export default function LeaderboardPage() {
         >
           <div className="flex items-center justify-center gap-2 mb-1">
             <Wallet className="w-4 h-4 text-red-200" />
-            <div className="text-red-100 text-xs font-bold tracking-widest">GROUP TREASURY</div>
+            <div className="text-red-100 text-xs font-bold tracking-widest">קופת הקבוצה</div>
           </div>
           <div className="text-white text-4xl font-cinzel font-black">
             {(groupBalance?.totalRake || 0).toFixed(0)} ₪
           </div>
           <div className="text-red-200 text-xs mt-1">
-            from {groupBalance?.sessionsCount || 0} sessions of rake
+            מ-{groupBalance?.sessionsCount || 0} משחקים
           </div>
         </motion.div>
 
@@ -54,17 +54,16 @@ export default function LeaderboardPage() {
                 className="flex items-center gap-3 bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all"
                 data-testid={`leaderboard-row-${player.playerId}`}
               >
-                {/* Rank badge */}
-                <div className="w-8 flex-shrink-0 text-center">
-                  {i === 0 ? (
-                    <Trophy className="w-5 h-5 mx-auto text-yellow-500" />
-                  ) : i === 1 ? (
-                    <Trophy className="w-5 h-5 mx-auto text-gray-400" />
-                  ) : i === 2 ? (
-                    <Trophy className="w-5 h-5 mx-auto text-amber-700" />
-                  ) : (
-                    <span className="text-gray-400 font-bold text-sm">#{i + 1}</span>
-                  )}
+                {/* Profit */}
+                <div className={`font-black text-base flex items-center gap-1 flex-shrink-0 ${player.totalProfit > 0 ? "text-green-600" : player.totalProfit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                  {player.totalProfit > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  {player.totalProfit > 0 ? "+" : ""}{player.totalProfit.toFixed(0)} ₪
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0 text-right">
+                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
+                  <div className="text-gray-400 text-xs">{player.totalGames} משחקים · {player.winRate.toFixed(0)}% ניצחון</div>
                 </div>
 
                 {/* Avatar */}
@@ -74,16 +73,13 @@ export default function LeaderboardPage() {
                   </span>
                 </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
-                  <div className="text-gray-400 text-xs">{player.totalGames} games · {player.winRate.toFixed(0)}% wins</div>
-                </div>
-
-                {/* Profit */}
-                <div className={`font-black text-base flex items-center gap-1 flex-shrink-0 ${player.totalProfit > 0 ? "text-green-600" : player.totalProfit < 0 ? "text-red-500" : "text-gray-400"}`}>
-                  {player.totalProfit > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                  {player.totalProfit > 0 ? "+" : ""}{player.totalProfit.toFixed(0)} ₪
+                {/* Rank badge */}
+                <div className="w-8 flex-shrink-0 text-center">
+                  {i === 0 ? <Trophy className="w-5 h-5 mx-auto text-yellow-500" />
+                    : i === 1 ? <Trophy className="w-5 h-5 mx-auto text-gray-400" />
+                    : i === 2 ? <Trophy className="w-5 h-5 mx-auto text-amber-700" />
+                    : <span className="text-gray-400 font-bold text-sm">#{i + 1}</span>
+                  }
                 </div>
               </Link>
             </motion.div>
@@ -93,8 +89,8 @@ export default function LeaderboardPage() {
         {(!leaderboard || leaderboard.length === 0) && (
           <div className="text-center py-16">
             <Trophy className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-            <div className="font-cinzel text-gray-300 text-xl mb-1">No rankings yet</div>
-            <div className="text-gray-400 text-sm">Complete a session to see the leaderboard</div>
+            <div className="font-cinzel text-gray-300 text-xl mb-1">אין דירוג עדיין</div>
+            <div className="text-gray-400 text-sm">סיים משחק לצפייה בדירוג</div>
           </div>
         )}
       </div>

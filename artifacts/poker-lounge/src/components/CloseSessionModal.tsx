@@ -47,59 +47,59 @@ export function CloseSessionModal({ open, onClose, players, onClose2 }: CloseSes
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-white border border-gray-200 max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2 justify-end">
+            סגירת משחק
             <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
               <DoorClosed className="w-4 h-4 text-red-600" />
             </div>
-            CLOSE SESSION
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <p className="text-gray-400 text-xs tracking-wider font-semibold">ENTER FINAL CHIP COUNT</p>
+          <p className="text-gray-400 text-xs tracking-wider font-semibold text-right">הזן מספר אסימונים סופי לכל שחקן</p>
 
           <div className="space-y-2">
             {players.map(player => (
               <div key={player.playerId} className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl p-3">
-                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gray-600 font-bold text-xs">
-                    {player.firstName[0]}{player.lastName?.[0] || ""}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
-                  <div className="text-gray-400 text-xs">{player.totalBuyins} ₪ = {player.totalBuyins * 2} chips</div>
-                </div>
                 <Input
                   type="number"
                   placeholder="0"
                   value={chips[player.playerId] || ""}
                   onChange={e => setChips(prev => ({ ...prev, [player.playerId]: e.target.value }))}
-                  className="w-24 bg-white border-gray-200 text-gray-900 text-center font-bold focus:border-red-400 focus:ring-red-100"
+                  className="w-24 bg-white border-gray-200 text-gray-900 text-center font-bold focus:border-red-400 focus:ring-red-100 flex-shrink-0"
                   min={0}
                   data-testid={`input-final-chips-${player.playerId}`}
                 />
+                <div className="flex-1 min-w-0 text-right">
+                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
+                  <div className="text-gray-400 text-xs">{player.totalBuyins} ₪ = {player.totalBuyins * 2} אסימונים</div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-600 font-bold text-xs">
+                    {player.firstName[0]}{player.lastName?.[0] || ""}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Chip balance checker */}
+          {/* Balance checker */}
           <div className={`rounded-xl p-3 text-sm border ${balanced ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500 text-xs">Chips in play</span>
-              <span className="text-gray-700 font-bold">{totalBuyinsChips}</span>
+              <span className={`font-bold ${balanced ? "text-green-600" : "text-red-500"}`}>{enteredChips}</span>
+              <span className="text-gray-500 text-xs">אסימונים שהוזנו</span>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <span className="text-gray-500 text-xs">Chips entered</span>
-              <span className={`font-bold ${balanced ? "text-green-600" : "text-red-500"}`}>{enteredChips}</span>
+              <span className="text-gray-700 font-bold">{totalBuyinsChips}</span>
+              <span className="text-gray-500 text-xs">אסימונים במשחק</span>
             </div>
             {!balanced && enteredChips > 0 && (
-              <div className="text-red-500 text-xs mt-1.5 font-semibold">
-                ⚠️ Difference: {chipsDiff > 0 ? "+" : ""}{chipsDiff.toFixed(0)} chips
+              <div className="text-red-500 text-xs mt-1.5 font-semibold text-right">
+                ⚠️ הפרש: {chipsDiff > 0 ? "+" : ""}{chipsDiff.toFixed(0)} אסימונים
               </div>
             )}
             {balanced && allFilled && (
-              <div className="text-green-600 text-xs mt-1.5 font-semibold">✅ Chips balance correctly</div>
+              <div className="text-green-600 text-xs mt-1.5 font-semibold text-right">✅ האסימונים מאוזנים</div>
             )}
           </div>
 
@@ -109,7 +109,7 @@ export function CloseSessionModal({ open, onClose, players, onClose2 }: CloseSes
             className="casino-btn w-full font-bold tracking-widest py-3"
             data-testid="button-confirm-close-session"
           >
-            {loading ? "Calculating..." : "CLOSE & SETTLE"}
+            {loading ? "מחשב..." : "סגור וחשב"}
           </Button>
         </form>
       </DialogContent>

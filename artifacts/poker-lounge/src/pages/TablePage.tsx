@@ -103,7 +103,6 @@ export default function TablePage() {
     finalChips: sp.finalChips,
   })) || [];
 
-  // Collect all buy-ins from all players, sorted newest first
   const allBuyins = (activeSession?.players || [])
     .flatMap(sp => (sp.buyins || []).map(b => ({
       ...b,
@@ -120,30 +119,29 @@ export default function TablePage() {
         {/* Session info bar */}
         {activeSession && (
           <div className="bg-gray-50 border-b border-gray-100 px-4 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="font-mono text-gray-900 font-bold text-sm">{elapsed}</span>
-              </div>
-              <div className="flex items-center gap-1 text-gray-500 text-xs">
-                <Timer className="w-3.5 h-3.5" />
-                <span>{tablePlayers.length} / 9 seats</span>
-              </div>
-            </div>
             <div className="flex items-center gap-3">
-              {/* Pot counter */}
-              <div className="text-xs text-gray-500">
-                Pot: <span className="text-gray-900 font-bold">{totalPot} ₪</span>
-              </div>
               {/* Rake — admin only */}
               {adminMode && (
                 <div className="flex items-center gap-1 bg-red-50 border border-red-100 rounded-full px-2.5 py-0.5">
                   <Wallet className="w-3 h-3 text-red-500" />
                   <span className="text-xs text-red-600 font-bold">
-                    {(groupBalance?.totalRake || 0).toFixed(0)} ₪ rake
+                    עמלת קבוצה: {(groupBalance?.totalRake || 0).toFixed(0)} ₪
                   </span>
                 </div>
               )}
+              <div className="text-xs text-gray-500">
+                קופה: <span className="text-gray-900 font-bold">{totalPot} ₪</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1 text-gray-500 text-xs">
+                <span>{tablePlayers.length} / 9 מושבים</span>
+                <Timer className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-gray-900 font-bold text-sm">{elapsed}</span>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              </div>
             </div>
           </div>
         )}
@@ -151,7 +149,7 @@ export default function TablePage() {
         {/* Main content */}
         <div className="flex-1 flex flex-col items-center justify-center p-4 gap-5">
           {isLoading ? (
-            <div className="text-gray-400 text-sm animate-pulse">Loading...</div>
+            <div className="text-gray-400 text-sm animate-pulse">טוען...</div>
           ) : !activeSession ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -168,7 +166,7 @@ export default function TablePage() {
                       CHINO POKER
                     </div>
                     <div className="w-12 h-px bg-white/30 mx-auto mb-2" />
-                    <div className="text-white/60 text-xs">No active session</div>
+                    <div className="text-white/60 text-xs">אין משחק פעיל</div>
                   </div>
                 </div>
               </div>
@@ -180,13 +178,15 @@ export default function TablePage() {
                   className="casino-btn font-bold tracking-widest px-10 py-3.5 rounded-xl text-sm"
                   data-testid="button-start-session"
                 >
-                  {createSession.isPending ? "Starting..." : "START SESSION"}
+                  {createSession.isPending ? "מתחיל..." : "התחל משחק"}
                 </button>
               ) : (
                 <p className="text-gray-400 text-sm">
+                  נדרשת{" "}
                   <button onClick={() => setShowAdminLogin(true)} className="text-red-600 font-semibold hover:underline" data-testid="button-admin-login-link">
-                    Admin login
-                  </button>{" "}required to start a session
+                    כניסת מנהל
+                  </button>{" "}
+                  להתחלת משחק
                 </p>
               )}
             </motion.div>
@@ -200,10 +200,10 @@ export default function TablePage() {
               />
 
               {adminMode && tablePlayers.length > 0 && (
-                <p className="text-gray-400 text-xs text-center">Tap a seat to add buy-in</p>
+                <p className="text-gray-400 text-xs text-center">לחץ על מושב להוסיף כניסה</p>
               )}
 
-              {/* Admin action bar */}
+              {/* Admin actions */}
               {adminMode && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -216,16 +216,16 @@ export default function TablePage() {
                     disabled={tablePlayers.length >= 9}
                     data-testid="button-add-player"
                   >
+                    הוסף שחקן
                     <Plus className="w-4 h-4" />
-                    ADD PLAYER
                   </button>
                   <button
                     onClick={() => setShowClose(true)}
                     className="sec-btn font-bold tracking-wider px-5 py-2.5 rounded-xl text-sm flex items-center gap-1.5 flex-1"
                     data-testid="button-close-session"
                   >
+                    סגור משחק
                     <DoorClosed className="w-4 h-4" />
-                    CLOSE
                   </button>
                   <div className="flex gap-2 w-full">
                     <button
@@ -233,9 +233,9 @@ export default function TablePage() {
                       className="sec-btn font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 flex-1"
                       data-testid="button-activity-log"
                     >
+                      יומן פעולות
                       <History className="w-3.5 h-3.5" />
-                      Activity Log
-                      {showLog ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                      {showLog ? <ChevronUp className="w-3 h-3 me-auto" /> : <ChevronDown className="w-3 h-3 me-auto" />}
                     </button>
                     <button
                       onClick={logout}
@@ -258,11 +258,11 @@ export default function TablePage() {
                     className="w-full max-w-sm overflow-hidden"
                   >
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3">
-                      <div className="text-xs font-bold text-gray-500 tracking-wider mb-2 px-1">
-                        RECENT BUY-INS {allBuyins.length > 0 && `(${allBuyins.length})`}
+                      <div className="text-xs font-bold text-gray-500 tracking-wider mb-2 text-right">
+                        כניסות אחרונות {allBuyins.length > 0 && `(${allBuyins.length})`}
                       </div>
                       {allBuyins.length === 0 ? (
-                        <div className="text-center py-4 text-gray-400 text-xs">No buy-ins recorded yet</div>
+                        <div className="text-center py-4 text-gray-400 text-xs">אין כניסות עדיין</div>
                       ) : (
                         <div className="space-y-1.5 max-h-52 overflow-y-auto">
                           {allBuyins.map(b => (
@@ -270,21 +270,21 @@ export default function TablePage() {
                               key={b.id}
                               className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2"
                             >
-                              <div>
-                                <span className="text-gray-900 font-semibold text-xs">{b.playerName}</span>
-                                <span className="text-gray-400 text-xs ml-2">+{b.amount} ₪</span>
-                              </div>
                               <button
                                 onClick={() => {
                                   if (activeSession) {
                                     deleteBuyinMutation.mutate({ sessionId: activeSession.id, buyinId: b.id });
                                   }
                                 }}
-                                className="text-gray-300 hover:text-red-500 transition-colors ml-2 p-1 rounded"
-                                title="Undo this buy-in"
+                                className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded"
+                                title="בטל כניסה זו"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
+                              <div className="text-right">
+                                <span className="text-gray-900 font-semibold text-xs">{b.playerName}</span>
+                                <span className="text-gray-400 text-xs mr-2">+{b.amount} ₪</span>
+                              </div>
                             </div>
                           ))}
                         </div>

@@ -46,7 +46,7 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
         playerId = selectedPlayer.id;
       } else {
         const newPlayer = await createPlayer.mutateAsync({
-          data: { firstName: firstName || "Guest", lastName, phone: phone || "", isGuest },
+          data: { firstName: firstName || "אורח", lastName, phone: phone || "", isGuest },
         });
         playerId = newPlayer.id;
         queryClient.invalidateQueries({ queryKey: getListPlayersQueryKey() });
@@ -69,11 +69,11 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-white border border-gray-200 max-w-md shadow-xl">
         <DialogHeader>
-          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2">
+          <DialogTitle className="font-cinzel text-gray-900 text-lg tracking-widest flex items-center gap-2 justify-end">
+            הוסף לשולחן
             <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 flex items-center justify-center">
               <UserPlus className="w-4 h-4 text-red-600" />
             </div>
-            ADD TO TABLE
           </DialogTitle>
         </DialogHeader>
 
@@ -82,92 +82,92 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
           <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
             <button
               type="button"
+              onClick={() => { setIsGuest(true); setSelectedPlayer(null); setSearchQuery(""); }}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold tracking-wider transition-all ${isGuest ? "bg-white shadow text-gray-900 border border-gray-200" : "text-gray-400"}`}
+              data-testid="button-guest-player"
+            >
+              אורח
+            </button>
+            <button
+              type="button"
               onClick={() => { setIsGuest(false); setSelectedPlayer(null); setSearchQuery(""); }}
               className={`flex-1 py-2 rounded-lg text-sm font-semibold tracking-wider transition-all flex items-center justify-center gap-1.5 ${!isGuest ? "bg-white shadow text-gray-900 border border-gray-200" : "text-gray-400"}`}
               data-testid="button-regular-player"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              REGULAR
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsGuest(true); setSelectedPlayer(null); setSearchQuery(""); }}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold tracking-wider transition-all ${isGuest ? "bg-white shadow text-gray-900 border border-gray-200" : "text-gray-400"}`}
-              data-testid="button-guest-player"
-            >
-              GUEST
+              רגיל
             </button>
           </div>
 
           {!isGuest ? (
             <div className="space-y-2">
-              <Label className="text-gray-400 text-xs tracking-wider font-semibold">SEARCH PLAYER</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">חיפוש שחקן</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Type name or phone..."
+                  placeholder="הקלד שם או טלפון..."
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setSelectedPlayer(null); }}
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 pl-9 focus:border-red-400 focus:ring-red-100"
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 pr-9 focus:border-red-400 focus:ring-red-100 text-right"
                   data-testid="input-search-player"
                 />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 {searchResults && searchResults.length > 0 && !selectedPlayer && (
                   <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-xl mt-1 shadow-lg max-h-44 overflow-y-auto">
                     {searchResults.map(p => (
                       <button
                         key={p.id}
                         type="button"
-                        className="w-full text-left px-3 py-2.5 hover:bg-gray-50 text-gray-900 text-sm border-b border-gray-50 last:border-0"
+                        className="w-full text-right px-3 py-2.5 hover:bg-gray-50 text-gray-900 text-sm border-b border-gray-50 last:border-0"
                         onClick={() => handleSelectPlayer(p)}
                         data-testid={`option-player-${p.id}`}
                       >
                         <span className="font-semibold">{p.firstName} {p.lastName}</span>
-                        {p.phone && <span className="text-gray-400 ml-2 text-xs">{p.phone}</span>}
+                        {p.phone && <span className="text-gray-400 mr-2 text-xs">{p.phone}</span>}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
               {selectedPlayer && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-2.5 text-sm flex items-center gap-2">
+                <div className="bg-green-50 border border-green-200 rounded-xl p-2.5 text-sm flex items-center gap-2 justify-end">
+                  <div className="text-right">
+                    <span className="text-green-700 font-semibold">{selectedPlayer.firstName} {selectedPlayer.lastName}</span>
+                    {selectedPlayer.phone && <span className="text-green-500 mr-2 text-xs">{selectedPlayer.phone}</span>}
+                  </div>
                   <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-green-600 font-bold text-xs">{selectedPlayer.firstName[0]}</span>
-                  </div>
-                  <div>
-                    <span className="text-green-700 font-semibold">{selectedPlayer.firstName} {selectedPlayer.lastName}</span>
-                    {selectedPlayer.phone && <span className="text-green-500 ml-2 text-xs">{selectedPlayer.phone}</span>}
                   </div>
                 </div>
               )}
               {searchQuery && !selectedPlayer && searchResults?.length === 0 && (
                 <div className="space-y-2 bg-gray-50 border border-gray-200 rounded-xl p-3">
-                  <Label className="text-gray-400 text-xs font-semibold">NOT FOUND — CREATE NEW</Label>
+                  <Label className="text-gray-400 text-xs font-semibold block text-right">לא נמצא — צור שחקן חדש</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)}
-                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-first-name" />
-                    <Input placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)}
-                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-last-name" />
+                    <Input placeholder="שם משפחה" value={lastName} onChange={e => setLastName(e.target.value)}
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 text-right" data-testid="input-last-name" />
+                    <Input placeholder="שם פרטי" value={firstName} onChange={e => setFirstName(e.target.value)}
+                      className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 text-right" data-testid="input-first-name" />
                   </div>
-                  <Input placeholder="Phone number" value={phone} onChange={e => setPhone(e.target.value)}
-                    className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-phone" />
+                  <Input placeholder="מספר טלפון" value={phone} onChange={e => setPhone(e.target.value)}
+                    className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 text-right" data-testid="input-phone" />
                 </div>
               )}
             </div>
           ) : (
             <div className="space-y-2">
-              <Label className="text-gray-400 text-xs tracking-wider font-semibold">GUEST DETAILS</Label>
+              <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">פרטי אורח</Label>
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)}
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" required data-testid="input-guest-first-name" />
-                <Input placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)}
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400" data-testid="input-guest-last-name" />
+                <Input placeholder="שם משפחה" value={lastName} onChange={e => setLastName(e.target.value)}
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 text-right" data-testid="input-guest-last-name" />
+                <Input placeholder="שם פרטי" value={firstName} onChange={e => setFirstName(e.target.value)}
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-red-400 text-right" required data-testid="input-guest-first-name" />
               </div>
             </div>
           )}
 
           {/* Buy-in amount */}
           <div className="space-y-2">
-            <Label className="text-gray-400 text-xs tracking-wider font-semibold">INITIAL BUY-IN</Label>
+            <Label className="text-gray-400 text-xs tracking-wider font-semibold block text-right">כניסה ראשונית</Label>
             <div className="flex gap-2">
               {[50, 100, 200].map(amount => (
                 <button
@@ -181,7 +181,7 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
                 </button>
               ))}
             </div>
-            <div className="text-center text-gray-400 text-xs">{initialBuyin * 2} chips (1:2 ratio)</div>
+            <div className="text-center text-gray-400 text-xs">{initialBuyin * 2} אסימונים (יחס 1:2)</div>
           </div>
 
           <Button
@@ -190,7 +190,7 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
             className="casino-btn w-full font-bold tracking-widest py-3"
             data-testid="button-confirm-add-player"
           >
-            {loading ? "Adding..." : "ADD TO TABLE"}
+            {loading ? "מוסיף..." : "הוסף לשולחן"}
           </Button>
         </form>
       </DialogContent>
