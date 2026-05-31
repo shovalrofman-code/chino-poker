@@ -10,6 +10,7 @@ import {
 import { useCreatePlayer } from "@workspace/api-client-react";
 import { UserPlus, Loader2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { handleError } from "@/lib/error-handler";
 
 interface RegisterPlayerModalProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
     firstName: "",
     lastName: "",
     phone: "",
+    isGuest: false,
   });
   const [success, setSuccess] = useState(false);
 
@@ -40,23 +42,23 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
-          isGuest: false,
+          isGuest: formData.isGuest,
         },
       });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        setFormData({ firstName: "", lastName: "", phone: "" });
+        setFormData({ firstName: "", lastName: "", phone: "", isGuest: false });
         onClose();
       }, 1500);
     } catch (e) {
-      console.error(e);
+      handleError(e, "נכשל ברישום השחקן");
     }
   };
 
   const handleClose = () => {
     if (!createPlayer.isPending) {
-      setFormData({ firstName: "", lastName: "", phone: "" });
+      setFormData({ firstName: "", lastName: "", phone: "", isGuest: false });
       setSuccess(false);
       onClose();
     }
@@ -67,7 +69,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
       <DialogContent className="max-w-sm rounded-[32px] p-8 border-none shadow-2xl overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center font-cinzel text-xl font-black tracking-widest uppercase italic">
-            New Player
+            שחקן חדש
           </DialogTitle>
         </DialogHeader>
 
@@ -95,7 +97,7 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
             >
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest me-1">
                     שם פרטי *
                   </label>
                   <input
@@ -103,24 +105,24 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
                     placeholder="שם פרטי"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-right"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-end"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest me-1">
                     שם משפחה
                   </label>
                   <input
                     placeholder="שם משפחה"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-right"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-end"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mr-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest me-1">
                     מספר טלפון
                   </label>
                   <input
@@ -128,7 +130,20 @@ export function RegisterPlayerModal({ open, onClose }: RegisterPlayerModalProps)
                     placeholder="טלפון"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-right"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-sm font-bold focus:ring-4 focus:ring-red-50 focus:outline-none transition-all text-end"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                  <div className="text-end">
+                    <div className="text-sm font-bold text-gray-900">שחקן אורח</div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">חד פעמי / ללא טלפון</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.isGuest}
+                    onChange={(e) => setFormData({ ...formData, isGuest: e.target.checked })}
+                    className="w-5 h-5 accent-red-600 rounded-lg cursor-pointer"
                   />
                 </div>
               </div>

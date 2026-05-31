@@ -42,7 +42,7 @@ export function AdminLoginModal({ open, onClose, onLogin }: AdminLoginModalProps
       <DialogContent className="max-w-sm rounded-[32px] p-8 border-none shadow-2xl overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-center font-cinzel text-2xl font-black tracking-widest uppercase italic">
-            Staff Only
+            כניסת מנהל
           </DialogTitle>
         </DialogHeader>
 

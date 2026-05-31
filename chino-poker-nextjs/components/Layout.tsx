@@ -23,18 +23,18 @@ export function Layout({ children, adminMode, onAdminClick }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="border-b border-gray-100 bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      {/* Top Header - Truly Sticky/Fixed */}
+      <header className="fixed top-0 start-0 end-0 border-b border-gray-100 bg-white/95 backdrop-blur-md px-4 py-3 flex items-center justify-between z-50 shadow-sm">
         <div className="flex items-center gap-2">
           {adminMode ? (
-            <div className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 animate-pulse">
-              <Shield size={10} />
-              מצב מנהל
+            <div className="bg-red-50 text-red-600 border border-red-100 text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 uppercase tracking-widest shadow-sm">
+              <Shield size={12} fill="currentColor" />
+              מנהל
             </div>
           ) : (
             <button
               onClick={onAdminClick}
-              className="text-gray-400 hover:text-red-600 text-xs font-bold transition-colors"
+              className="text-gray-300 hover:text-red-600 text-[10px] font-black tracking-widest uppercase transition-colors px-3 py-1.5 border border-transparent hover:border-red-100 hover:bg-red-50 rounded-xl"
             >
               כניסת מנהל
             </button>
@@ -51,13 +51,13 @@ export function Layout({ children, adminMode, onAdminClick }: LayoutProps) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto pb-20">
+      {/* Main Content with padding to account for fixed header and nav */}
+      <main className="flex-1 pt-[60px] pb-20">
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-100 bg-white/90 backdrop-blur-md px-4 py-2 flex items-center justify-around z-40">
+      <nav className="fixed bottom-0 start-0 end-0 border-t border-gray-100 bg-white/90 backdrop-blur-md px-4 py-2 flex items-center justify-around z-40 safe-area-pb">
         {navItems.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href;
           return (

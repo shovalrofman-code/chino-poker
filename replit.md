@@ -2,84 +2,61 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Monorepo using TypeScript and npm workspaces.
 
 ## Stack
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-- **Frontend**: React + Vite + Tailwind CSS + framer-motion
+- **Framework**: Next.js 16 (App Router)
+- **Database**: Supabase Cloud (PostgreSQL)
+- **Authentication**: Admin Mode (password protected)
+- **Styling**: Tailwind CSS v4 + Framer Motion
+- **API Client**: React Query + Orval generated hooks
+- **Validation**: Zod
+- **Infrastructure**: Supabase (Cloud hosted)
 
 ## Apps
 
-### THE POKER LOUNGE (`artifacts/poker-lounge`)
+### CHINO POKER (`chino-poker-nextjs`)
 
-A high-end professional poker session manager web app. Casino-style dark theme (red/black/white/gold).
+A high-end professional poker session manager web app. Casino-style professional theme.
 
 **Features:**
 - Circular poker table layout showing active session players
-- Admin password protection (`Shoval25`)
-- Player database with autocomplete (search by name/phone)
-- Buy-in tracking: default 50 NIS = 100 chips (1:2 ratio). Quick +50/+100/+200 NIS buttons
+- Admin password protection
+- Player database with search by name/phone
+- Buy-in tracking: default 1:2 ratio (NIS:Chips)
 - Session timer (real-time clock from session start)
 - Settlement engine: calculates "who pays whom" with phone numbers, minimal transfers
 - Rake calculation: 10% on net profit only
 - Group balance/treasury tracking across sessions
 - Player dashboards with lifetime P/L, win rate %, total games
-- Guest mode for one-time players
 - Leaderboard page
 
-**Pages:**
-- `/` — Main poker table view
-- `/players` — Player database
-- `/player/:id` — Individual player profile & stats
-- `/settlement/:sessionId` — Settlement results after closing a session
-- `/history` — Session history
-- `/leaderboard` — All-time rankings + group treasury
-
-**Admin password:** `Shoval25` (stored in sessionStorage)
+**Admin password:** `Shoval25`
 
 ## Structure
 
 ```text
-artifacts-monorepo/
-├── artifacts/
-│   ├── api-server/         # Express API server
-│   └── poker-lounge/       # THE POKER LOUNGE React+Vite frontend
+chino-poker/
+├── chino-poker-nextjs/     # Main Next.js Application
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
+│   └── integrations/       # External integrations
 ├── scripts/                # Utility scripts
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-├── tsconfig.json
-└── package.json
+├── package.json
+└── tsconfig.json
 ```
 
-## Database Schema
+## Database Schema (Supabase)
 
-- `players` — Registered players (id, firstName, lastName, phone, isGuest, createdAt)
-- `sessions` — Game sessions (id, status, note, totalRake, startedAt, closedAt)
-- `session_players` — Players per session (id, sessionId, playerId, totalBuyins, finalChips)
-- `buyins` — Individual buy-in records (id, sessionId, playerId, amount, chips, createdAt)
-- `group_balance` — Rake per session (id, sessionId, rake, createdAt)
-
-## TypeScript & Composite Projects
-
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references.
+- `players` — Registered players (id, first_name, last_name, phone, is_guest, created_at)
+- `sessions` — Game sessions (id, status, note, total_rake, started_at, closed_at)
+- `session_players` — Players per session (id, session_id, player_id, total_buyins, final_chips)
+- `buyins` — Individual buy-in records (id, session_id, player_id, amount, chips, created_at)
+- `group_balance` — Rake per session (id, session_id, rake, created_at)
 
 ## Root Scripts
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API client from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes
+- `npm run build` — build all workspaces
+- `npm run typecheck` — run type checking

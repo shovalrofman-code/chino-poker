@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, sessionsTable, sessionPlayersTable, playersTable, groupBalanceTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 import { calculateSettlement } from "../../utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * POST /api/sessions/[id]/close
@@ -20,63 +17,66 @@ export async function POST(
       finalChips: Array<{ playerId: number; chips: number }>;
     };
 
-    if (IS_DEV) {
-      return NextResponse.json({
-        sessionId,
-        totalPot: 500,
-        totalRake: 50,
-        players: [],
-        transfers: [],
-      });
-    }
-
-    const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, sessionId));
-    if (!session) {
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
+    
+    if (sessionError || !session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    const sessionPlayers = await db
-      .select()
-      .from(sessionPlayersTable)
-      .where(eq(sessionPlayersTable.sessionId, sessionId));
+    const { data: sessionPlayers, error: spError } = await supabase
+      .from('session_players')
+      .select('*')
+      .eq('session_id', sessionId);
 
-    const playerIds = sessionPlayers.map((sp) => sp.playerId);
-    const players =
-      playerIds.length > 0
-        ? await db
-            .select()
-            .from(playersTable)
-            .where(
-              sql`${playersTable.id} = ANY(ARRAY[${sql.join(
-                playerIds.map((id) => sql`${id}`),
-                sql`, `
-              )}]::int[])`
-            )
-        : [];
+    if (spError || !sessionPlayers) throw spError;
+
+    const playerIds = sessionPlayers.map((sp: any) => sp.player_id);
+    
+    let players: any[] = [];
+    if (playerIds.length > 0) {
+      const { data: playersData, error: pError } = await supabase
+        .from('players')
+        .select('*')
+        .in('id', playerIds);
+      if (!pError) players = playersData || [];
+    }
 
     // Update final chips for each player in session
     for (const fc of finalChips) {
-      const sp = sessionPlayers.find((sp) => sp.playerId === fc.playerId);
+      const sp = sessionPlayers.find((sp: any) => sp.player_id === fc.playerId);
       if (sp) {
-        await db
-          .update(sessionPlayersTable)
-          .set({ finalChips: String(fc.chips) })
-          .where(eq(sessionPlayersTable.id, sp.id));
+        await supabase
+          .from('session_players')
+          .update({ final_chips: String(fc.chips) })
+          .eq('id', sp.id);
       }
     }
 
-    const settlement = calculateSettlement(session, sessionPlayers, players, finalChips);
+    // Re-fetch session players to get updated final_chips for settlement calculation
+    const { data: updatedSessionPlayers } = await supabase
+      .from('session_players')
+      .select('*')
+      .eq('session_id', sessionId);
 
-    await db
-      .update(sessionsTable)
-      .set({
+    const settlement = calculateSettlement(session, updatedSessionPlayers || [], players, finalChips);
+
+    await supabase
+      .from('sessions')
+      .update({
         status: "closed",
-        closedAt: new Date(),
-        totalRake: String(settlement.totalRake),
+        closed_at: new Date().toISOString(),
+        total_rake: String(settlement.totalRake),
       })
-      .where(eq(sessionsTable.id, sessionId));
+      .eq('id', sessionId);
 
-    await db.insert(groupBalanceTable).values({ sessionId, rake: String(settlement.totalRake) });
+    await supabase.from('group_balance').insert({ 
+      session_id: sessionId, 
+      rake: String(settlement.totalRake) 
+    });
 
     return NextResponse.json(settlement);
   } catch (error) {

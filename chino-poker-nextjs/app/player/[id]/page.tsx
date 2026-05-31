@@ -19,7 +19,7 @@ export default function PlayerProfilePage() {
   if (!player) {
     return (
       <Layout adminMode={adminMode}>
-        <div className="flex items-center justify-center h-full py-20 text-gray-400 text-sm">טוען...</div>
+        <div className="flex items-center justify-center h-full py-20 text-gray-400 text-sm font-bold uppercase tracking-widest animate-pulse">טוען נתוני שחקן...</div>
       </Layout>
     );
   }
@@ -53,12 +53,12 @@ export default function PlayerProfilePage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3">
-            <div className={`text-left flex-shrink-0 ${isWinner ? "text-green-600" : isLoser ? "text-red-500" : "text-gray-400"}`}>
+            <div className={`text-start flex-shrink-0 ${isWinner ? "text-green-600" : isLoser ? "text-red-500" : "text-gray-400"}`}>
               <div className="text-2xl font-black">{profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪</div>
-              <div className="text-xs text-gray-400 mt-0.5">רווח/הפסד כולל</div>
+              <div className="text-xs text-gray-400 mt-0.5">רווח/הפסד מצטבר</div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-right">
+              <div className="text-end">
                 <h1 className="text-gray-900 text-xl font-bold">{player.firstName} {player.lastName}</h1>
                 <div className="text-gray-400 text-sm mt-0.5">{player.phone || "אין טלפון"}</div>
                 {stats && stats.totalGames > 0 && (
@@ -92,7 +92,7 @@ export default function PlayerProfilePage() {
                 <span className="text-gray-400 text-[10px] tracking-wider font-semibold">{card.label}</span>
                 <card.icon className={`w-3.5 h-3.5 ${card.color}`} />
               </div>
-              <div className={`text-2xl font-black text-right ${card.color}`}>
+              <div className={`text-2xl font-black text-end ${card.color}`}>
                 {card.value}<span className="text-sm font-semibold">{card.suffix}</span>
               </div>
             </motion.div>
@@ -107,21 +107,21 @@ export default function PlayerProfilePage() {
             transition={{ delay: 0.3 }}
             className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm"
           >
-            <div className="text-gray-400 text-xs tracking-wider font-bold mb-4 text-right">שיאי משחקים</div>
+            <div className="text-gray-400 text-xs tracking-wider font-bold mb-4 text-end">שיאי משחקים</div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-left">
+              <div className="text-start">
                 <div className="text-gray-400 text-xs mb-1">המשחק הגרוע ביותר</div>
                 <div className="text-red-500 font-black text-xl">{stats.biggestLoss.toFixed(0)} ₪</div>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <div className="text-gray-400 text-xs mb-1">המשחק הטוב ביותר</div>
                 <div className="text-green-600 font-black text-xl">+{stats.biggestWin.toFixed(0)} ₪</div>
               </div>
-              <div className="text-left">
+              <div className="text-start">
                 <div className="text-gray-400 text-xs mb-1">שיא רצף הפסדים</div>
                 <div className="text-red-400 font-black text-xl">{s?.longestLossStreak || 0}</div>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <div className="text-gray-400 text-xs mb-1">שיא רצף ניצחונות</div>
                 <div className="text-orange-500 font-black text-xl flex items-center gap-1 justify-end">
                   <Flame className="w-4 h-4" />{s?.longestWinStreak || 0}

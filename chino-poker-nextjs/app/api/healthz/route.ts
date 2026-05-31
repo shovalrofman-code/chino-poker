@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { HealthCheckResponse } from "@workspace/api-zod";
+import { HealthCheckResponse } from "@/lib/api-types";
 
 /**
  * Health check endpoint for the API.

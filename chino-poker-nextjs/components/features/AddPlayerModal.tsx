@@ -7,9 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSearchPlayers, getSearchPlayersQueryKey } from "@workspace/api-client-react";
+import { useSearchPlayers, getSearchPlayersQueryKey, useCreatePlayer } from "@workspace/api-client-react";
 import { UserPlus, UserCheck, Search, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { handleError } from "@/lib/error-handler";
 
 interface AddPlayerModalProps {
   open: boolean;
@@ -33,7 +34,7 @@ function PlayerSearchResult({
       className="w-full flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-red-300 hover:shadow-md transition-all group"
     >
       <UserCheck className="w-5 h-5 text-gray-300 group-hover:text-red-500 transition-colors" />
-      <div className="text-right">
+      <div className="text-end">
         <div className="text-gray-900 font-bold text-sm">
           {player.firstName} {player.lastName}
         </div>
@@ -121,6 +122,8 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
   const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const createPlayer = useCreatePlayer();
+
   const { data: searchResults, isLoading } = useSearchPlayers(
     { q: search },
     { query: { queryKey: getSearchPlayersQueryKey({ q: search }), enabled: search.length >= 2, staleTime: 0 } }
@@ -133,7 +136,27 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
       await onAddPlayer(selectedPlayer.id, amount);
       handleClose();
     } catch (e) {
-      console.error(e);
+      handleError(e, "נכשל בהוספת השחקן");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleQuickAddGuest = async () => {
+    if (!search) return;
+    setIsSubmitting(true);
+    try {
+      const guest = await createPlayer.mutateAsync({
+        data: {
+          firstName: search,
+          lastName: "(אורח)",
+          phone: "",
+          isGuest: true,
+        },
+      });
+      setSelectedPlayer(guest);
+    } catch (e) {
+      handleError(e, "נכשל ביצירת שחקן אורח");
     } finally {
       setIsSubmitting(false);
     }
@@ -150,7 +173,7 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
       <DialogContent className="max-w-sm rounded-[32px] p-6 border-none shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-center font-cinzel text-xl font-black tracking-[0.2em] uppercase italic">
-            Add Player
+            הוספת שחקן
           </DialogTitle>
         </DialogHeader>
 
@@ -170,9 +193,9 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
                     placeholder="חפש לפי שם או טלפון..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pr-10 pl-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-100 transition-all text-right"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pe-10 ps-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-100 transition-all text-end"
                   />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                  <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                 </div>
 
                 <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
@@ -180,22 +203,37 @@ export function AddPlayerModal({ open, onClose, onAddPlayer }: AddPlayerModalPro
                     <div className="py-10 text-center flex flex-col items-center gap-2">
                       <Loader2 className="w-6 h-6 text-red-500 animate-spin" />
                       <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                        Searching...
+                        מחפש...
                       </span>
                     </div>
-                  ) : searchResults && searchResults.length > 0 ? (
-                    searchResults.map((p) => (
-                      <PlayerSearchResult key={p.id} player={p} onSelect={setSelectedPlayer} />
-                    ))
-                  ) : search.length >= 2 ? (
-                    <div className="py-10 text-center text-gray-300">
-                       <UserPlus className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                       <div className="text-xs font-bold">לא נמצאו שחקנים</div>
-                    </div>
                   ) : (
-                    <div className="py-10 text-center text-gray-300 italic text-xs">
-                      הקלד לפחות 2 תווים לחיפוש
-                    </div>
+                    <>
+                      {searchResults && searchResults.length > 0 ? (
+                        searchResults.map((p) => (
+                          <PlayerSearchResult key={p.id} player={p} onSelect={setSelectedPlayer} />
+                        ))
+                      ) : search.length >= 2 ? (
+                        <div className="py-10 text-center text-gray-300">
+                          <UserPlus className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                          <div className="text-xs font-bold">לא נמצאו שחקנים</div>
+                        </div>
+                      ) : (
+                        <div className="py-10 text-center text-gray-300 italic text-xs">
+                          הקלד לפחות 2 תווים לחיפוש
+                        </div>
+                      )}
+
+                      {search.length >= 2 && (
+                        <button
+                          onClick={handleQuickAddGuest}
+                          disabled={isSubmitting}
+                          className="w-full mt-4 flex items-center justify-center gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-bold text-sm hover:bg-red-100 transition-all"
+                        >
+                          {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                          הוסף את "{search}" כאורח
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </motion.div>

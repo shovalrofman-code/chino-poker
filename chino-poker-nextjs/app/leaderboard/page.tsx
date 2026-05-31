@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useGetLeaderboard, useGetGroupBalance, getGetLeaderboardQueryKey, getGetGroupBalanceQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
-import { AdminLoginModal } from "@/components/AdminLoginModal";
+import { AdminLoginModal } from "@/components/features/AdminLoginModal";
 import { useState } from "react";
 import { Trophy, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { FintechCard } from "@/components/ui/FintechCard";
 
 export default function LeaderboardPage() {
   const { adminMode, login } = useAdmin();
@@ -19,7 +20,7 @@ export default function LeaderboardPage() {
   return (
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
       <div className="p-4 max-w-xl mx-auto space-y-4 pb-8">
-        <div className="pt-2 text-right">
+        <div className="pt-2 text-end">
           <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">טבלת מובילים</h1>
           <p className="text-gray-400 text-xs mt-0.5">דירוג כל הזמנים</p>
         </div>
@@ -45,32 +46,28 @@ export default function LeaderboardPage() {
         {/* Rankings */}
         <div className="space-y-2">
           {leaderboard?.map((player, i) => (
-            <motion.div
+            <Link
               key={player.playerId}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
+              href={`/player/${player.playerId}`}
+              className="block"
+              data-testid={`leaderboard-row-${player.playerId}`}
             >
-              <Link
-                href={`/player/${player.playerId}`}
-                className="flex items-center gap-3 bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all"
-                data-testid={`leaderboard-row-${player.playerId}`}
-              >
+              <FintechCard delay={i * 0.04} className="flex items-center gap-3">
                 {/* Profit */}
-                <div className={`font-black text-base flex items-center gap-1 flex-shrink-0 ${player.totalProfit > 0 ? "text-green-600" : player.totalProfit < 0 ? "text-red-500" : "text-gray-400"}`}>
-                  {player.totalProfit > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                <div className={`font-black text-sm flex items-center gap-1 flex-shrink-0 ${player.totalProfit > 0 ? "text-green-600" : player.totalProfit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                  {player.totalProfit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                   {player.totalProfit > 0 ? "+" : ""}{player.totalProfit.toFixed(0)} ₪
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0 text-right">
-                  <div className="text-gray-900 font-semibold text-sm truncate">{player.firstName} {player.lastName}</div>
-                  <div className="text-gray-400 text-xs">{player.totalGames} משחקים · {player.winRate.toFixed(0)}% ניצחון</div>
+                <div className="flex-1 min-w-0 text-end">
+                  <div className="text-gray-900 font-bold text-sm truncate">{player.firstName} {player.lastName}</div>
+                  <div className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">{player.totalGames} משחקים · {player.winRate.toFixed(0)}% ניצחון</div>
                 </div>
 
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gray-600 font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-600 font-black text-sm uppercase">
                     {player.firstName[0]}{player.lastName?.[0] || ""}
                   </span>
                 </div>
@@ -80,11 +77,11 @@ export default function LeaderboardPage() {
                   {i === 0 ? <Trophy className="w-5 h-5 mx-auto text-yellow-500" />
                     : i === 1 ? <Trophy className="w-5 h-5 mx-auto text-gray-400" />
                     : i === 2 ? <Trophy className="w-5 h-5 mx-auto text-amber-700" />
-                    : <span className="text-gray-400 font-bold text-sm">#{i + 1}</span>
+                    : <span className="text-gray-400 font-black text-xs">#{i + 1}</span>
                   }
                 </div>
-              </Link>
-            </motion.div>
+              </FintechCard>
+            </Link>
           ))}
         </div>
 

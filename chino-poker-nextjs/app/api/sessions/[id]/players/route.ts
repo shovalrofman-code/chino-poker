@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, sessionsTable, sessionPlayersTable, buyinsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 import { CHIPS_RATIO } from "../../utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * POST /api/sessions/[id]/players
@@ -18,31 +15,23 @@ export async function POST(
     const sessionId = parseInt(id);
     const { playerId, initialBuyin } = await request.json();
 
-    if (IS_DEV) {
-      return NextResponse.json({
-        id: Math.floor(Math.random() * 1000),
-        sessionId,
-        playerId,
-        totalBuyins: initialBuyin || 50,
-        finalChips: null,
-      }, { status: 201 });
-    }
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .eq('status', 'active')
+      .maybeSingle();
 
-    const [session] = await db
-      .select()
-      .from(sessionsTable)
-      .where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.status, "active")));
-
-    if (!session) {
+    if (sessionError || !session) {
       return NextResponse.json({ error: "Active session not found" }, { status: 404 });
     }
 
-    const [existing] = await db
-      .select()
-      .from(sessionPlayersTable)
-      .where(
-        and(eq(sessionPlayersTable.sessionId, sessionId), eq(sessionPlayersTable.playerId, playerId))
-      );
+    const { data: existing, error: existingError } = await supabase
+      .from('session_players')
+      .select('*')
+      .eq('session_id', sessionId)
+      .eq('player_id', playerId)
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json({ error: "Player already in session" }, { status: 400 });
@@ -51,19 +40,22 @@ export async function POST(
     const buyinAmount = initialBuyin || 50;
     const chips = buyinAmount * CHIPS_RATIO;
 
-    const [sp] = await db
-      .insert(sessionPlayersTable)
-      .values({
-        sessionId,
-        playerId,
-        totalBuyins: String(buyinAmount),
-        finalChips: null,
+    const { data: sp, error: spError } = await supabase
+      .from('session_players')
+      .insert({
+        session_id: sessionId,
+        player_id: playerId,
+        total_buyins: String(buyinAmount),
+        final_chips: null,
       })
-      .returning();
+      .select()
+      .single();
 
-    await db.insert(buyinsTable).values({
-      sessionId,
-      playerId,
+    if (spError) throw spError;
+
+    await supabase.from('buyins').insert({
+      session_id: sessionId,
+      player_id: playerId,
       amount: String(buyinAmount),
       chips: String(chips),
     });
@@ -71,10 +63,10 @@ export async function POST(
     return NextResponse.json(
       {
         id: sp.id,
-        sessionId: sp.sessionId,
-        playerId: sp.playerId,
-        totalBuyins: parseFloat(sp.totalBuyins as string || "0"),
-        finalChips: sp.finalChips !== null ? parseFloat(sp.finalChips as string) : null,
+        sessionId: sp.session_id,
+        playerId: sp.player_id,
+        totalBuyins: parseFloat(sp.total_buyins || "0"),
+        finalChips: sp.final_chips !== null ? parseFloat(sp.final_chips) : null,
       },
       { status: 201 }
     );

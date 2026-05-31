@@ -1,33 +1,27 @@
 import { NextResponse } from "next/server";
-import { db, playersTable } from "@workspace/db";
-
-const IS_DEV = process.env.NODE_ENV === "development";
-
-// Mock data for development mode
-const MOCK_PLAYERS = [
-  { id: 1, firstName: "שובל", lastName: "מנהל", phone: "0501234567", isGuest: false, createdAt: new Date().toISOString() },
-  { id: 2, firstName: "ישראל", lastName: "ישראלי", phone: "0521234567", isGuest: false, createdAt: new Date().toISOString() },
-];
+import { supabase } from "@/lib/supabase";
 
 /**
  * GET /api/players
  * Fetches all players ordered by first name.
  */
 export async function GET() {
-  if (IS_DEV) {
-    return NextResponse.json(MOCK_PLAYERS);
-  }
-
   try {
-    const players = await db.select().from(playersTable).orderBy(playersTable.firstName);
+    const { data: players, error } = await supabase
+      .from('players')
+      .select('*')
+      .order('first_name');
+
+    if (error) throw error;
+
     return NextResponse.json(
-      players.map((p) => ({
+      players.map((p: any) => ({
         id: p.id,
-        firstName: p.firstName,
-        lastName: p.lastName,
+        firstName: p.first_name,
+        lastName: p.last_name,
         phone: p.phone,
-        isGuest: p.isGuest,
-        createdAt: p.createdAt?.toISOString(),
+        isGuest: p.is_guest,
+        createdAt: p.created_at,
       }))
     );
   } catch (error) {
@@ -44,36 +38,27 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { firstName, lastName, phone, isGuest } = body;
 
-    if (IS_DEV) {
-      const mockNewPlayer = {
-        id: Math.floor(Math.random() * 1000) + 10,
-        firstName,
-        lastName,
+    const { data: player, error } = await supabase
+      .from('players')
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
         phone: phone || "",
-        isGuest: isGuest || false,
-        createdAt: new Date().toISOString(),
-      };
-      return NextResponse.json(mockNewPlayer, { status: 201 });
-    }
-
-    const [player] = await db
-      .insert(playersTable)
-      .values({
-        firstName,
-        lastName,
-        phone: phone || "",
-        isGuest: !!isGuest,
+        is_guest: !!isGuest,
       })
-      .returning();
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json(
       {
         id: player.id,
-        firstName: player.firstName,
-        lastName: player.lastName,
+        firstName: player.first_name,
+        lastName: player.last_name,
         phone: player.phone,
-        isGuest: player.isGuest,
-        createdAt: player.createdAt?.toISOString(),
+        isGuest: player.is_guest,
+        createdAt: player.created_at,
       },
       { status: 201 }
     );

@@ -16,9 +16,9 @@ interface ProvidersProps {
  */
 export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
-    // Configure base URL for the generated API client hooks.
-    // Default to relative /api which works correctly in Next.js App Router.
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+    // The generated API client hooks already include the "/api" prefix.
+    // We only need to set a base URL if the API is on a different domain.
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
     setBaseUrl(baseUrl);
   }, []);
 

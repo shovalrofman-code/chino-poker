@@ -13,15 +13,16 @@ import {
   getGetGroupBalanceQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PokerTable } from "@/components/PokerTable";
-import { AddPlayerModal } from "@/components/AddPlayerModal";
-import { BuyinModal } from "@/components/BuyinModal";
-import { CloseSessionModal } from "@/components/CloseSessionModal";
-import { AdminLoginModal } from "@/components/AdminLoginModal";
+import { PokerTable } from "@/components/poker/PokerTable";
+import { AddPlayerModal } from "@/components/features/AddPlayerModal";
+import { BuyinModal } from "@/components/features/BuyinModal";
+import { CloseSessionModal } from "@/components/features/CloseSessionModal";
+import { AdminLoginModal } from "@/components/features/AdminLoginModal";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useSessionTimer } from "@/hooks/useSessionTimer";
 import { Layout } from "@/components/Layout";
 import { Plus, DoorClosed, Timer } from "lucide-react";
+import { handleError } from "@/lib/error-handler";
 
 export default function TablePage() {
   const queryClient = useQueryClient();
@@ -65,30 +66,60 @@ export default function TablePage() {
     setModals((prev) => ({ ...prev, [key]: val }));
 
   const handleStartSession = async () => {
-    await createSession.mutateAsync({ data: {} });
-    queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    try {
+      await createSession.mutateAsync({ data: {} });
+      queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    } catch (e) {
+      handleError(e, "נכשל בפתיחת שולחן חדש");
+    }
   };
 
   const handleAddPlayer = async (playerId: number, initialBuyin: number) => {
     if (!activeSession) return;
-    await addPlayer.mutateAsync({ id: activeSession.id, data: { playerId, initialBuyin } });
-    queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    try {
+      await addPlayer.mutateAsync({ id: activeSession.id, data: { playerId, initialBuyin } });
+      queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    } catch (e) {
+      handleError(e, "נכשל בהוספת שחקן");
+    }
   };
 
   const handleBuyin = async (playerId: number, amount: number) => {
     if (!activeSession) return;
-    await recordBuyin.mutateAsync({ id: activeSession.id, data: { playerId, amount } });
-    queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    try {
+      await recordBuyin.mutateAsync({ id: activeSession.id, data: { playerId, amount } });
+      queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    } catch (e) {
+      handleError(e, "נכשל ברישום כניסה");
+    }
+  };
+
+  const handleUndoBuyin = async (buyinId: number) => {
+    if (!activeSession) return;
+    try {
+      const res = await fetch(`/api/sessions/${activeSession.id}/buyins/${buyinId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("נכשל בביטול הכניסה");
+      queryClient.invalidateQueries({ queryKey: getGetActiveSessionQueryKey() });
+    } catch (e) {
+      handleError(e, "נכשל בביטול הכניסה");
+    }
   };
 
   const handleCloseSession = async (finalChipsArray: Array<{ playerId: number; chips: number }>) => {
     if (!activeSession) return;
     try {
-      await closeSession.mutateAsync({ id: activeSession.id, data: { finalChips: finalChipsArray } });
-      queryClient.setQueryData(getGetActiveSessionQueryKey(), null);
-      router.push(`/settlement/${activeSession.id}`);
+      if (finalChipsArray.length === 0) {
+        // If the game is empty, delete it instead of closing/saving it
+        await fetch(`/api/sessions/${activeSession.id}`, { method: "DELETE" });
+        queryClient.setQueryData(getGetActiveSessionQueryKey(), null);
+        // Stay on home page
+      } else {
+        await closeSession.mutateAsync({ id: activeSession.id, data: { finalChips: finalChipsArray } });
+        queryClient.setQueryData(getGetActiveSessionQueryKey(), null);
+        router.push(`/settlement/${activeSession.id}`);
+      }
     } catch (e) {
-      console.error("Failed to close session", e);
+      handleError(e, "נכשל בסגירת המשחק");
     }
   };
 
@@ -106,6 +137,7 @@ export default function TablePage() {
       phone: sp.player?.phone || "",
       totalBuyins: sp.totalBuyins,
       finalChips: sp.finalChips,
+      buyins: sp.buyins,
     })) || [];
 
   const totalPot = tablePlayers.reduce((sum, p) => sum + p.totalBuyins, 0);
@@ -114,7 +146,7 @@ export default function TablePage() {
     <Layout adminMode={adminMode} onAdminClick={() => !adminMode && toggleModal("adminLogin", true)}>
       <div className="flex flex-col min-h-full bg-white">
         {activeSession && (
-          <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+          <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-[57px] z-40 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="text-xs text-black">
                 קופה: <span className="font-bold text-sm">{totalPot} ₪</span>
@@ -134,28 +166,42 @@ export default function TablePage() {
 
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           {!activeSession ? (
-            <div className="text-center space-y-8 w-full max-w-sm">
-              <div className="poker-table-surface rounded-[150px] aspect-[2/1] w-full flex items-center justify-center">
-                <div className="text-center text-white font-black text-3xl italic font-serif tracking-widest">
-                  CHINO POKER
+            <div className="text-center space-y-10 w-full max-w-sm">
+              <div className="relative">
+                <div className="poker-table-surface rounded-[150px] aspect-[2/1] w-full flex items-center justify-center shadow-2xl">
+                  <div className="text-center text-white font-black text-4xl italic font-serif tracking-[0.2em] drop-shadow-lg">
+                    CHINO
+                  </div>
+                </div>
+                {/* Decorative Cards */}
+                <div className="absolute -bottom-6 start-1/2 -translate-x-1/2 flex gap-1 transform rotate-2">
+                   <div className="w-12 h-16 bg-white rounded-lg shadow-xl border border-gray-100 flex items-center justify-center transform -rotate-12 translate-y-2">
+                     <span className="text-red-600 font-black text-xl">A</span>
+                   </div>
+                   <div className="w-12 h-16 bg-white rounded-lg shadow-xl border border-gray-100 flex items-center justify-center transform rotate-6">
+                     <span className="text-black font-black text-xl">K</span>
+                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col gap-4 items-center">
+              <div className="flex flex-col gap-6 items-center pt-8">
                 {adminMode ? (
                   <button
                     onClick={handleStartSession}
-                    className="casino-btn px-12 py-4"
+                    className="casino-btn px-16 py-5 text-xl"
                   >
                     פתח שולחן חדש
                   </button>
                 ) : (
-                  <button
-                    onClick={() => toggleModal("adminLogin", true)}
-                    className="text-red-600 font-bold underline"
-                  >
-                    הקש קוד מנהל להתחלת משחק
-                  </button>
+                  <div className="space-y-4">
+                    <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">אין משחק פעיל כרגע</p>
+                    <button
+                      onClick={() => toggleModal("adminLogin", true)}
+                      className="text-red-600 font-black text-sm uppercase tracking-widest border-b-2 border-red-600 pb-1 active:scale-95 transition-transform"
+                    >
+                      כניסת מנהל
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -202,6 +248,7 @@ export default function TablePage() {
         }}
         player={selectedPlayer}
         onBuyin={handleBuyin}
+        onUndoBuyin={handleUndoBuyin}
       />
       {activeSession && (
         <CloseSessionModal

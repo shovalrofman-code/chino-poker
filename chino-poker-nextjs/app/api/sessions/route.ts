@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server";
-import { db, sessionsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 import { formatSession } from "./utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * GET /api/sessions
  * List all sessions.
  */
 export async function GET() {
-  if (IS_DEV) {
-    return NextResponse.json([
-      { id: 1, status: "closed", startedAt: new Date().toISOString(), totalRake: 50 },
-    ]);
-  }
-
   try {
-    const sessions = await db.select().from(sessionsTable).orderBy(desc(sessionsTable.startedAt));
+    const { data: sessions, error } = await supabase
+      .from('sessions')
+      .select('*')
+      .order('started_at', { ascending: false });
+
+    if (error) throw error;
+
     return NextResponse.json(sessions.map(formatSession));
   } catch (error) {
     return NextResponse.json({ error: "Failed to list sessions" }, { status: 500 });
@@ -30,14 +27,11 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    if (IS_DEV) {
-      return NextResponse.json({ id: 2, status: "active", startedAt: new Date().toISOString(), totalRake: 0 }, { status: 201 });
-    }
-
-    const [existing] = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.status, "active"));
+    const { data: existing, error: existingError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('status', 'active')
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json({ error: "An active session already exists" }, { status: 400 });
@@ -46,14 +40,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { note } = body;
 
-    const [session] = await db
-      .insert(sessionsTable)
-      .values({
+    const { data: session, error } = await supabase
+      .from('sessions')
+      .insert({
         note: note || null,
         status: "active",
-        totalRake: "0",
+        total_rake: "0",
       })
-      .returning();
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json(formatSession(session), { status: 201 });
   } catch (error) {

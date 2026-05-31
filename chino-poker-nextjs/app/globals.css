@@ -1,125 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: 'Inter', sans-serif;
-  --font-serif: 'Cinzel', serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Cinzel', ui-serif, Georgia, serif;
   
   --color-primary: #DC2626;
   --color-primary-foreground: #ffffff;
   
-  --radius-xl: 0.625rem;
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+
+  /* Custom Casino Palette */
+  --color-casino-red: #DC2626;
+  --color-casino-dark: #0a0a0a;
+  --color-felt-green: #065f46;
+  --color-gold: #fbbf24;
 }
 
 @layer base {
-  * { @apply border-[#e5e7eb]; }
-  body { @apply font-sans antialiased bg-white text-[#0a0a0a]; }
+  * {
+    border-color: #f3f4f6;
+  }
+  
+  body {
+    background-color: white;
+    color: #0a0a0a;
+    font-family: var(--font-sans);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-/* Fonts */
-.font-cinzel { font-family: 'Cinzel', serif; }
+.font-cinzel {
+  font-family: var(--font-serif);
+}
 
-/* Casino Red Oval Table */
-.poker-table {
+/* Custom Casino Styles */
+.poker-table-surface {
   background: radial-gradient(ellipse at 50% 40%, #C91A2E 0%, #991020 45%, #700A16 80%, #55060F 100%);
   border: 6px solid #7a0a18;
-  box-shadow:
-    0 0 0 3px rgba(220, 38, 38, 0.25),
-    0 0 0 5px rgba(120, 10, 20, 0.15),
-    inset 0 0 80px rgba(0,0,0,0.25),
-    0 24px 64px rgba(180, 10, 30, 0.25),
-    0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2), inset 0 0 80px rgba(0,0,0,0.3), 0 20px 50px rgba(0,0,0,0.1);
 }
 
-/* Player seat cards */
-.seat-card {
-  background: #ffffff;
-  border: 1.5px solid rgba(220, 38, 38, 0.2);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  transition: all 0.15s ease;
-}
-
-.seat-card:hover {
-  border-color: rgba(220, 38, 38, 0.6);
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
-  transform: translateY(-1px);
-}
-
-.seat-card.active-seat {
-  border-color: #DC2626;
-  box-shadow: 0 0 0 2px rgba(220,38,38,0.3), 0 4px 16px rgba(220,38,38,0.25);
-}
-
-/* Logo shimmer — red/white */
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.logo-shimmer {
-  background: linear-gradient(90deg, #ffffff 0%, #fecaca 35%, #ffffff 60%, #fca5a5 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 5s linear infinite;
-}
-
-/* Primary red button */
 .casino-btn {
-  background: #DC2626;
-  border: 1px solid #B91C1C;
-  color: #ffffff;
-  transition: all 0.15s ease;
-  font-weight: bold;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
+  background-color: #DC2626;
+  color: white;
+  font-weight: 900;
+  padding: 0.875rem 1.5rem;
+  border-radius: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-}
-.casino-btn:hover:not(:disabled) {
-  background: #B91C1C;
-  box-shadow: 0 4px 12px rgba(220,38,38,0.35);
-  transform: scale(1.02);
-}
-.casino-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  gap: 0.625rem;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
 
-/* Card base (white fintech) */
-.fintech-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+.casino-btn:hover {
+  background-color: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.25);
 }
 
-/* Secondary button */
-.sec-btn {
-  background: #ffffff;
-  border: 1.5px solid #e5e7eb;
-  color: #374151;
-  transition: all 0.15s ease;
-  font-weight: bold;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.sec-btn:hover {
-  border-color: #DC2626;
-  color: #DC2626;
+.casino-btn:active {
+  transform: translateY(0px) scale(0.98);
 }
 
-.admin-badge {
-  background: #DC2626;
-  animation: pulse 2s infinite;
+.casino-btn-secondary {
+  background-color: #0a0a0a;
+  color: white;
 }
 
-.chip-display {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+.casino-btn-secondary:hover {
+  background-color: #1a1a1a;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* Safe Area Padding for Mobile */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom);
 }

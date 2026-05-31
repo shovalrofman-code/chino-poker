@@ -1,5 +1,4 @@
-import { db, playersTable, sessionPlayersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 
 const CHIPS_RATIO = 2;
 
@@ -7,19 +6,22 @@ const CHIPS_RATIO = 2;
  * Service: Builds comprehensive performance statistics for a single player.
  */
 export async function buildPlayerStats(playerId: number) {
-  const [player] = await db
-    .select()
-    .from(playersTable)
-    .where(eq(playersTable.id, playerId));
+  const { data: player, error: pError } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', playerId)
+    .single();
 
-  if (!player) return null;
+  if (pError || !player) return null;
 
-  const playerSessions = await db
-    .select()
-    .from(sessionPlayersTable)
-    .where(eq(sessionPlayersTable.playerId, playerId));
+  const { data: playerSessions, error: psError } = await supabase
+    .from('session_players')
+    .select('*')
+    .eq('player_id', playerId);
 
-  const closedSessions = playerSessions.filter((s) => s.finalChips !== null);
+  if (psError || !playerSessions) return null;
+
+  const closedSessions = playerSessions.filter((s: any) => s.final_chips !== null);
   const totalGames = closedSessions.length;
 
   let totalBuyinsSum = 0;
@@ -31,9 +33,9 @@ export async function buildPlayerStats(playerId: number) {
 
   const sessionResults: number[] = [];
 
-  closedSessions.forEach((s) => {
-    const buyins = parseFloat(s.totalBuyins as string || "0");
-    const finalChips = parseFloat(s.finalChips as string || "0");
+  closedSessions.forEach((s: any) => {
+    const buyins = parseFloat(s.total_buyins || "0");
+    const finalChips = parseFloat(s.final_chips || "0");
     const profitNIS = (finalChips - buyins * CHIPS_RATIO) / CHIPS_RATIO;
     const rake = profitNIS > 0 ? profitNIS * 0.1 : 0;
     const netProfit = profitNIS - rake;
@@ -79,8 +81,8 @@ export async function buildPlayerStats(playerId: number) {
 
   return {
     playerId: player.id,
-    firstName: player.firstName,
-    lastName: player.lastName,
+    firstName: player.first_name,
+    lastName: player.last_name,
     phone: player.phone,
     totalGames,
     totalBuyins: totalBuyinsSum,

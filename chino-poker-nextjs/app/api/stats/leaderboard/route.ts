@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, playersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 import { buildPlayerStats } from "../utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * GET /api/stats/leaderboard
@@ -11,19 +8,14 @@ const IS_DEV = process.env.NODE_ENV === "development";
  */
 export async function GET() {
   try {
-    if (IS_DEV) {
-      return NextResponse.json([
-        { playerId: 1, firstName: "שובל", lastName: "מנהל", totalProfit: 500, winRate: 70, totalGames: 10 },
-        { playerId: 2, firstName: "ישראל", lastName: "ישראלי", totalProfit: 200, winRate: 60, totalGames: 8 },
-      ]);
-    }
+    const { data: players, error } = await supabase
+      .from('players')
+      .select('*')
+      .eq('is_guest', false);
 
-    const players = await db
-      .select()
-      .from(playersTable)
-      .where(eq(playersTable.isGuest, false));
+    if (error) throw error;
 
-    const statsPromises = players.map((p) => buildPlayerStats(p.id));
+    const statsPromises = players.map((p: any) => buildPlayerStats(p.id));
     const allStats = await Promise.all(statsPromises);
 
     const validStats = allStats

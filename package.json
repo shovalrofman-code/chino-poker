@@ -5,8 +5,10 @@
   "private": true,
   "workspaces": [
     "chino-poker-nextjs",
-    "artifacts/*",
-    "lib/*",
+    "artifacts/mockup-sandbox",
+    "artifacts/poker-lounge",
+    "lib/api-client-react",
+    "lib/api-spec",
     "lib/integrations/*",
     "scripts"
   ],

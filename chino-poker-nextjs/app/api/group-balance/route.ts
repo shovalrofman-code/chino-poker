@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, groupBalanceTable } from "@workspace/db";
-import { sql } from "drizzle-orm";
-
-const IS_DEV = process.env.NODE_ENV === "development";
+import { supabase } from "@/lib/supabase";
 
 /**
  * GET /api/group-balance
@@ -10,23 +7,18 @@ const IS_DEV = process.env.NODE_ENV === "development";
  */
 export async function GET() {
   try {
-    if (IS_DEV) {
-      return NextResponse.json({
-        totalRake: 1250.5,
-        sessionsCount: 25,
-      });
-    }
+    const { data, error } = await supabase
+      .from('group_balance')
+      .select('rake');
 
-    const result = await db
-      .select({
-        totalRake: sql<number>`COALESCE(SUM(${groupBalanceTable.rake}::numeric), 0)`,
-        sessionsCount: sql<number>`COUNT(*)`,
-      })
-      .from(groupBalanceTable);
+    if (error) throw error;
+
+    const totalRake = data.reduce((sum, item: any) => sum + parseFloat(item.rake || "0"), 0);
+    const sessionsCount = data.length;
 
     return NextResponse.json({
-      totalRake: parseFloat(String(result[0]?.totalRake || 0)),
-      sessionsCount: parseInt(String(result[0]?.sessionsCount || 0)),
+      totalRake,
+      sessionsCount,
     });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch group balance" }, { status: 500 });

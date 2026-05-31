@@ -59,7 +59,7 @@ function PlayerSeat({
           </span>
           
           {/* Buy-in Badge */}
-          <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black px-1.5 py-0.5 rounded-full border border-white/20 shadow-md">
+          <div className="absolute -top-2 -end-2 bg-black text-white text-[10px] font-black px-1.5 py-0.5 rounded-full border border-white/20 shadow-md">
             {player.totalBuyins}
           </div>
         </div>
@@ -106,7 +106,7 @@ export function PokerTable({ players, adminMode, onSeatClick }: PokerTableProps)
             CHINO
           </div>
           <div className="text-red-500/20 font-black text-xs uppercase tracking-[0.5em] mt-2">
-            Poker Management
+            ניהול פוקר מקצועי
           </div>
         </div>
       </div>
@@ -125,8 +125,11 @@ export function PokerTable({ players, adminMode, onSeatClick }: PokerTableProps)
           ))}
           
           {players.length === 0 && (
-            <div className="text-white/30 text-xs font-bold uppercase tracking-widest animate-pulse">
-              Waiting for players...
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/20 animate-bounce" />
+              <div className="text-white/30 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+                השולחן ריק
+              </div>
             </div>
           )}
         </div>
@@ -134,7 +137,7 @@ export function PokerTable({ players, adminMode, onSeatClick }: PokerTableProps)
 
       {/* Dealer Position (Decorative) */}
       <div className="absolute bottom-[18%] bg-white text-black text-[8px] font-black px-2 py-0.5 rounded border border-black/10 shadow-sm uppercase tracking-tighter">
-        Dealer
+        דילר
       </div>
     </div>
   );

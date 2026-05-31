@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 import { getSessionWithPlayers } from "../utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * GET /api/sessions/[id]
@@ -19,17 +18,6 @@ export async function GET(
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
 
-    if (IS_DEV) {
-      return NextResponse.json({
-        id: sessionId,
-        status: "closed",
-        startedAt: new Date().toISOString(),
-        closedAt: new Date().toISOString(),
-        totalRake: 50,
-        players: [],
-      });
-    }
-
     const result = await getSessionWithPlayers(sessionId);
     
     if (!result) {
@@ -38,6 +26,39 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
+    console.error("Session Fetch Error:", error);
     return NextResponse.json({ error: "Failed to fetch session" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/sessions/[id]
+ * Deletes a session and all its associated data (via cascade).
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const sessionId = parseInt(id);
+
+    if (isNaN(sessionId)) {
+      return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('id', sessionId);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Session Delete Error:", error);
+    return NextResponse.json({ error: "Failed to delete session" }, { status: 500 });
   }
 }

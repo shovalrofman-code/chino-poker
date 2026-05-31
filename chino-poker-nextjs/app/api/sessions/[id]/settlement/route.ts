@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, sessionsTable, sessionPlayersTable, playersTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase";
 import { calculateSettlement } from "../../utils";
-
-const IS_DEV = process.env.NODE_ENV === "development";
 
 /**
  * GET /api/sessions/[id]/settlement
@@ -21,44 +18,42 @@ export async function GET(
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
 
-    if (IS_DEV) {
-      return NextResponse.json({
-        sessionId,
-        totalPot: 500,
-        totalRake: 50,
-        players: [],
-        transfers: [],
-      });
-    }
+    const { data: session, error: sessionError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
 
-    const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, sessionId));
-    if (!session) {
+    if (sessionError || !session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    const sessionPlayers = await db
-      .select()
-      .from(sessionPlayersTable)
-      .where(eq(sessionPlayersTable.sessionId, sessionId));
+    const { data: sessionPlayers, error: spError } = await supabase
+      .from('session_players')
+      .select('*')
+      .eq('session_id', sessionId);
 
-    const playerIds = sessionPlayers.map((sp) => sp.playerId);
-    const players =
-      playerIds.length > 0
-        ? await db
-            .select()
-            .from(playersTable)
-            .where(
-              sql`${playersTable.id} = ANY(ARRAY[${sql.join(
-                playerIds.map((id) => sql`${id}`),
-                sql`, `
-              )}]::int[])`
-            )
-        : [];
+    if (spError || !sessionPlayers) throw spError;
+
+    const playerIds = sessionPlayers.map((sp: any) => sp.player_id);
+    
+    let players: any[] = [];
+    if (playerIds.length > 0) {
+      const { data: playersData, error: pError } = await supabase
+        .from('players')
+        .select('*')
+        .in('id', playerIds);
+      if (!pError) players = playersData || [];
+    }
 
     const settlement = calculateSettlement(session, sessionPlayers, players);
 
     return NextResponse.json(settlement);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to retrieve settlement" }, { status: 500 });
+    console.error("Settlement API Error:", error);
+    return NextResponse.json({ 
+      error: "Failed to retrieve settlement",
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

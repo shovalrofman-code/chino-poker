@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useListPlayers, useGetLeaderboard, getListPlayersQueryKey, getGetLeaderboardQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
-import { AdminLoginModal } from "@/components/AdminLoginModal";
-import { RegisterPlayerModal } from "@/components/RegisterPlayerModal";
+import { AdminLoginModal } from "@/components/features/AdminLoginModal";
+import { RegisterPlayerModal } from "@/components/features/RegisterPlayerModal";
 import { Search, TrendingUp, TrendingDown, Minus, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
+import { FintechCard } from "@/components/ui/FintechCard";
 
 export default function PlayersPage() {
   const { adminMode, login } = useAdmin();
@@ -47,7 +48,7 @@ export default function PlayersPage() {
               </button>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">שחקנים</h1>
             <p className="text-gray-400 text-xs mt-0.5">{filtered.length} רשומים</p>
           </div>
@@ -60,10 +61,10 @@ export default function PlayersPage() {
             placeholder="חפש לפי שם או טלפון..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl pr-9 pl-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all text-right"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pe-9 ps-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all text-end"
             data-testid="input-search-players"
           />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
 
         {/* Player list */}
@@ -75,45 +76,39 @@ export default function PlayersPage() {
             const winRate = stats?.winRate || 0;
 
             return (
-              <motion.div
+              <Link
                 key={player.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.025 }}
+                href={`/player/${player.id}`}
+                className="block"
+                data-testid={`card-player-${player.id}`}
               >
-                <Link
-                  href={`/player/${player.id}`}
-                  className="flex items-center justify-between bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all cursor-pointer"
-                  data-testid={`card-player-${player.id}`}
-                >
-                  <div className="text-left flex-shrink-0 ml-3">
+                <FintechCard delay={i * 0.025} className="flex items-center justify-between">
+                  <div className="text-start flex-shrink-0 ms-3">
                     {games > 0 ? (
                       <>
                         <div className={`font-bold text-sm flex items-center gap-1 ${profit > 0 ? "text-green-600" : profit < 0 ? "text-red-500" : "text-gray-400"}`}>
                           {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                           {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
                         </div>
-                        <div className="text-gray-400 text-xs">{games} משחקים · {winRate.toFixed(0)}% ניצחון</div>
+                        <div className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">{games} משחקים · {winRate.toFixed(0)}%</div>
                       </>
                     ) : (
-                      <div className="text-gray-300 text-xs">אין משחקים</div>
+                      <div className="text-gray-300 text-[10px] font-bold uppercase tracking-tighter">אין משחקים</div>
                     )}
                   </div>
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="min-w-0 text-right">
-                      <div className="text-gray-900 font-semibold text-sm truncate">
+                    <div className="min-w-0 text-end">
+                      <div className="text-gray-900 font-bold text-sm truncate">
                         {player.firstName} {player.lastName}
                       </div>
-                      <div className="text-gray-400 text-xs truncate">{player.phone || "אין טלפון"}</div>
+                      <div className="text-gray-400 text-[11px] mt-0.5 font-medium truncate">{player.phone || "אין טלפון"}</div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-red-600 font-bold text-sm">
-                        {player.firstName[0]}{player.lastName?.[0] || ""}
-                      </span>
+                    <div className="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0 font-black text-sm uppercase text-red-600">
+                      {player.firstName[0]}{player.lastName?.[0] || ""}
                     </div>
                   </div>
-                </Link>
-              </motion.div>
+                </FintechCard>
+              </Link>
             );
           })}
         </div>

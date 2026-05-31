@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, playersTable } from "@workspace/db";
-import { ilike, or } from "drizzle-orm";
-
-const IS_DEV = process.env.NODE_ENV === "development";
+import { supabase } from "@/lib/supabase";
 
 /**
  * GET /api/players/search?q=...
@@ -16,38 +13,23 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  if (IS_DEV) {
-    // Basic mock search for development
-    return NextResponse.json([
-      { id: 1, firstName: "שובל", lastName: "מנהל", phone: "0501234567", isGuest: false },
-    ].filter(p => 
-      p.firstName.includes(query) || 
-      p.lastName.includes(query) || 
-      p.phone.includes(query)
-    ));
-  }
-
   try {
-    const players = await db
-      .select()
-      .from(playersTable)
-      .where(
-        or(
-          ilike(playersTable.firstName, `%${query}%`),
-          ilike(playersTable.lastName, `%${query}%`),
-          ilike(playersTable.phone, `%${query}%`)
-        )
-      )
+    const { data: players, error } = await supabase
+      .from('players')
+      .select('*')
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,phone.ilike.%${query}%`)
       .limit(50);
 
+    if (error) throw error;
+
     return NextResponse.json(
-      players.map((p) => ({
+      players.map((p: any) => ({
         id: p.id,
-        firstName: p.firstName,
-        lastName: p.lastName,
+        firstName: p.first_name,
+        lastName: p.last_name,
         phone: p.phone,
-        isGuest: p.isGuest,
-        createdAt: p.createdAt?.toISOString(),
+        isGuest: p.is_guest,
+        createdAt: p.created_at,
       }))
     );
   } catch (error) {

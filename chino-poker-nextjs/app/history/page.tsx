@@ -6,9 +6,11 @@ import { useListSessions, getListSessionsQueryKey } from "@workspace/api-client-
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { useAdmin } from "@/hooks/useAdmin";
-import { AdminLoginModal } from "@/components/AdminLoginModal";
+import { AdminLoginModal } from "@/components/features/AdminLoginModal";
 import { Clock, CheckCircle, ChevronLeft, Trash2, AlertTriangle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FintechCard } from "@/components/ui/FintechCard";
+import { handleError } from "@/lib/error-handler";
 
 function deleteSession(id: number) {
   return fetch(`/api/sessions/${id}`, { method: "DELETE" }).then(async r => {
@@ -101,6 +103,9 @@ export default function HistoryPage() {
       queryClient.invalidateQueries({ queryKey: getListSessionsQueryKey() });
       setPendingDelete(null);
     },
+    onError: (e) => {
+      handleError(e, "נכשל במחיקת המשחק");
+    },
   });
 
   return (
@@ -114,7 +119,7 @@ export default function HistoryPage() {
               </span>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">היסטוריה</h1>
             <p className="text-gray-400 text-xs mt-0.5">
               {sessions?.filter(s => s.status === "closed").length || 0} משחקים שהסתיימו
@@ -124,69 +129,62 @@ export default function HistoryPage() {
 
         <div className="space-y-2">
           {sessions?.map((session, i) => (
-            <motion.div
-              key={session.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ delay: i * 0.03 }}
-              layout
-            >
-              <div className="flex items-center gap-2">
-                {/* Admin trash button */}
-                {adminMode && session.status === "closed" && (
-                  <button
-                    onClick={e => { e.preventDefault(); setPendingDelete(session.id); }}
-                    className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-300 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-all"
-                    data-testid={`button-delete-session-${session.id}`}
-                    title="מחק משחק"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-
-                {/* Session card */}
-                <Link
-                  href={session.status === "closed" ? `/settlement/${session.id}` : "/"}
-                  className="flex-1 flex items-center justify-between bg-white border border-gray-200 hover:border-red-300 hover:shadow-sm rounded-2xl p-4 transition-all"
-                  data-testid={`session-card-${session.id}`}
+            <div key={session.id} className="flex items-center gap-2">
+              {/* Admin trash button */}
+              {adminMode && session.status === "closed" && (
+                <button
+                  onClick={e => { e.preventDefault(); setPendingDelete(session.id); }}
+                  className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-2xl bg-gray-50 border border-gray-100 text-gray-400 hover:border-red-300 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
+                  data-testid={`button-delete-session-${session.id}`}
+                  title="מחק משחק"
                 >
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Session card */}
+              <Link
+                href={session.status === "closed" ? `/settlement/${session.id}` : "/"}
+                className="flex-1"
+                data-testid={`session-card-${session.id}`}
+              >
+                <FintechCard delay={i * 0.03} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-shrink-0 me-2">
                     {session.status === "closed" && (
-                      <div className="text-left">
+                      <div className="text-start">
                         <div className="text-red-600 text-sm font-bold">
                           {parseFloat(String(session.totalRake || 0)).toFixed(0)} ₪
                         </div>
-                        <div className="text-gray-400 text-[10px]">עמלה</div>
+                        <div className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">עמלה</div>
                       </div>
                     )}
                     <ChevronLeft className="w-4 h-4 text-gray-300" />
                   </div>
 
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="min-w-0 text-right">
-                      <div className="text-gray-900 font-semibold text-sm">
+                    <div className="min-w-0 text-end">
+                      <div className="text-gray-900 font-bold text-sm">
                         {session.status === "active" ? "🟢 משחק פעיל" : `משחק #${session.id}`}
                       </div>
-                      <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-0.5 justify-end">
+                      <div className="flex items-center gap-1.5 text-gray-400 text-[11px] mt-0.5 justify-end font-medium">
                         <span>{formatDuration(session.startedAt, session.closedAt)}</span>
                         <span className="text-gray-200">·</span>
                         <span>{formatDate(session.startedAt)}</span>
                         <Clock className="w-3 h-3 flex-shrink-0" />
                       </div>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      session.status === "active" ? "bg-green-50 border border-green-200" : "bg-gray-100 border border-gray-200"
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      session.status === "active" ? "bg-green-50 border border-green-100" : "bg-gray-50 border border-gray-100"
                     }`}>
                       {session.status === "active"
                         ? <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-                        : <CheckCircle className="w-4 h-4 text-gray-400" />
+                        : <CheckCircle className="w-5 h-5 text-gray-300" />
                       }
                     </div>
                   </div>
-                </Link>
-              </div>
-            </motion.div>
+                </FintechCard>
+              </Link>
+            </div>
           ))}
         </div>
 
