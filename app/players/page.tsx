@@ -1,0 +1,137 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useListPlayers, useGetLeaderboard, getListPlayersQueryKey, getGetLeaderboardQueryKey } from "@/lib/api-hooks";
+import { Layout } from "@/components/Layout";
+import { useAdmin } from "@/hooks/useAdmin";
+import { AdminLoginModal } from "@/components/features/AdminLoginModal";
+import { RegisterPlayerModal } from "@/components/features/RegisterPlayerModal";
+import { Search, TrendingUp, TrendingDown, Minus, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
+import { FintechCard } from "@/components/ui/FintechCard";
+
+export default function PlayersPage() {
+  const { adminMode, login } = useAdmin();
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const { data: players, refetch } = useListPlayers({ query: { queryKey: getListPlayersQueryKey() } });
+  const { data: leaderboard } = useGetLeaderboard({ query: { queryKey: getGetLeaderboardQueryKey() } });
+
+  const filtered = players?.filter(p =>
+    !p.isGuest && (
+      p.firstName.toLowerCase().includes(search.toLowerCase()) ||
+      p.lastName.toLowerCase().includes(search.toLowerCase()) ||
+      p.phone.includes(search)
+    )
+  ) || [];
+
+  const statsMap = new Map(leaderboard?.map(s => [s.playerId, s]) || []);
+
+  return (
+    <Layout adminMode={adminMode} onAdminClick={() => !adminMode && setShowAdminLogin(true)}>
+      <div className="p-4 max-w-xl mx-auto space-y-4 pb-8">
+
+        {/* Header */}
+        <div className="pt-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {adminMode && (
+              <button
+                onClick={() => setShowRegister(true)}
+                className="casino-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide"
+                data-testid="button-register-player"
+              >
+                <UserPlus className="w-4 h-4" />
+                הוסף שחקן
+              </button>
+            )}
+          </div>
+          <div className="text-end">
+            <h1 className="font-cinzel text-gray-900 text-xl font-bold tracking-widest">שחקנים</h1>
+            <p className="text-gray-400 text-xs mt-0.5">{filtered.length} רשומים</p>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <input
+            type="search"
+            placeholder="חפש לפי שם או טלפון..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pe-9 ps-4 py-3 text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all text-end"
+            data-testid="input-search-players"
+          />
+          <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        </div>
+
+        {/* Player list */}
+        <div className="space-y-2">
+          {filtered.map((player, i) => {
+            const stats = statsMap.get(player.id);
+            const profit = stats?.totalProfit || 0;
+            const games = stats?.totalGames || 0;
+            const winRate = stats?.winRate || 0;
+
+            return (
+              <Link
+                key={player.id}
+                href={`/player/${player.id}`}
+                className="block"
+                data-testid={`card-player-${player.id}`}
+              >
+                <FintechCard delay={i * 0.025} className="flex items-center justify-between">
+                  <div className="text-start flex-shrink-0 ms-3">
+                    {games > 0 ? (
+                      <>
+                        <div className={`font-bold text-sm flex items-center gap-1 ${profit > 0 ? "text-green-600" : profit < 0 ? "text-red-500" : "text-gray-400"}`}>
+                          {profit > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : profit < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                          {profit > 0 ? "+" : ""}{profit.toFixed(0)} ₪
+                        </div>
+                        <div className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">{games} משחקים · {winRate.toFixed(0)}%</div>
+                      </>
+                    ) : (
+                      <div className="text-gray-300 text-[10px] font-bold uppercase tracking-tighter">אין משחקים</div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="min-w-0 text-end">
+                      <div className="text-gray-900 font-bold text-sm truncate">
+                        {player.firstName} {player.lastName}
+                      </div>
+                      <div className="text-gray-400 text-[11px] mt-0.5 font-medium truncate">{player.phone || "אין טלפון"}</div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0 font-black text-sm uppercase text-red-600">
+                      {player.firstName[0]}{player.lastName?.[0] || ""}
+                    </div>
+                  </div>
+                </FintechCard>
+              </Link>
+            );
+          })}
+        </div>
+
+        {filtered.length === 0 && !search && (
+          <div className="text-center py-16 text-gray-300">
+            <div className="font-cinzel text-2xl mb-2 text-gray-300">אין שחקנים עדיין</div>
+            {adminMode
+              ? <button onClick={() => setShowRegister(true)} className="text-red-500 font-semibold text-sm underline">הוסף את השחקן הראשון</button>
+              : <div className="text-sm text-gray-400">כנס כמנהל להוספת שחקנים</div>
+            }
+          </div>
+        )}
+
+        {filtered.length === 0 && search && (
+          <div className="text-center py-10 text-gray-400 text-sm">
+            לא נמצאו שחקנים עבור "{search}"
+          </div>
+        )}
+      </div>
+
+      <AdminLoginModal open={showAdminLogin} onClose={() => setShowAdminLogin(false)} onLogin={login} />
+      <RegisterPlayerModal open={showRegister} onClose={() => { setShowRegister(false); refetch(); }} />
+    </Layout>
+  );
+}
